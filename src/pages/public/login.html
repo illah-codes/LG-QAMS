@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - LG QAMS</title>
+    <link rel="stylesheet" href="/src/styles/flowbite-tokens.css" />
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/flowbite.css" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="flex-center full-height p-4">
+        <div class="card shadow-lg w-full max-w-500">
+          <div class="card-body p-6">
+            <div class="text-center mb-6">
+              <h1 class="text-2xl font-bold mb-2">
+                LG QAMS
+              </h1>
+              <p class="text-secondary text-sm">
+                Staff Login Portal
+              </p>
+            </div>
+
+            <form id="login-form" onsubmit="handleLogin(event)">
+              <div class="form-group">
+                <label for="login-staff-id" class="form-label">Staff ID</label>
+                <input
+                  type="text"
+                  id="login-staff-id"
+                  name="staffId"
+                  class="form-input"
+                  placeholder="Enter your Staff ID"
+                  required
+                  autofocus
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="login-password" class="form-label">Password</label>
+                <input
+                  type="password"
+                  id="login-password"
+                  name="password"
+                  class="form-input"
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+
+              <div class="flex-center mb-6">
+                <input type="checkbox" id="remember-me" name="remember" />
+                <label for="remember-me" class="ml-2 text-sm text-secondary">
+                  Remember me
+                </label>
+              </div>
+
+              <div id="login-error" class="mb-4 error-message hidden"></div>
+
+              <button type="submit" class="btn btn-primary btn-full p-3 mb-4">
+                Login
+              </button>
+            </form>
+
+            <div class="text-center">
+              <a href="/scan" data-router class="text-primary text-sm">
+                Scan QR Code Instead
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      window.handleLogin = function(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const staffId = formData.get('staffId');
+        const password = formData.get('password');
+        
+        // Mock authentication
+        // In real app, this would verify credentials
+        import('/src/services/mock-data.js').then((mockData) => {
+          const user = mockData.mockStaff.find(s => s.id === staffId && s.password === password);
+          if (user) {
+            // Store session (mock)
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            
+            // Redirect based on role
+            const redirectPath = user.role === 'Admin' ? '/admin/dashboard' : '/staff/dashboard';
+            import('/src/utils/navigation.js').then(({ navigate }) => {
+              navigate(redirectPath);
+            });
+          } else {
+            document.getElementById('login-error').classList.remove('hidden');
+            document.getElementById('login-error').textContent = 'Invalid Staff ID or password';
+          }
+        });
+      };
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

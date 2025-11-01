@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scan QR Code - LG QAMS</title>
+    <link rel="stylesheet" href="/src/styles/flowbite-tokens.css" />
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/flowbite.css" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="container page-container max-w-600">
+        <!-- Instructions Card -->
+        <div class="card shadow-sm card-spacing">
+          <div class="card-body p-6">
+            <h2 class="text-2xl mb-4 text-center">
+              Check In / Check Out
+            </h2>
+            <div class="info-box">
+              <p class="info-box-text">
+                📱 <strong>Instructions:</strong> Enter your Staff ID and password below. The system will automatically record your check-in or check-out based on your last record today.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Login Form -->
+        <div class="card shadow-lg">
+          <div class="card-body p-6">
+            <form id="scan-login-form" onsubmit="handleScanLogin(event)">
+              <div class="form-group-lg">
+                <label for="staff-id" class="form-label">Staff ID</label>
+                <input
+                  type="text"
+                  id="staff-id"
+                  name="staffId"
+                  class="form-input"
+                  placeholder="Enter your Staff ID"
+                  required
+                  autofocus
+                />
+              </div>
+
+              <div class="form-group-lg">
+                <label for="password" class="form-label">Password</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  class="form-input"
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+
+              <div id="error-message" class="mb-4 error-message hidden"></div>
+
+              <button type="submit" class="btn btn-primary btn-full p-3 text-base">
+                Submit Attendance
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- QR Code Reference -->
+        <div class="card shadow-sm mt-6">
+          <div class="card-body p-6 text-center">
+            <p class="text-secondary text-sm mb-4">
+              Need to scan the QR code? <a href="/" data-router class="text-primary">View QR Code</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      window.handleScanLogin = function(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const staffId = formData.get('staffId');
+        const password = formData.get('password');
+        
+        // Mock authentication - in real app, this would call an API
+        // For now, redirect to success page
+        import('/src/utils/navigation.js').then(({ navigate }) => {
+          navigate('/scan/success?name=Staff&time=' + new Date().toLocaleTimeString());
+        });
+      };
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

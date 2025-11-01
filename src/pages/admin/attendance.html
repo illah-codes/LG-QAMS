@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attendance Records - LG QAMS</title>
+    <link rel="stylesheet" href="/src/styles/flowbite-tokens.css" />
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/flowbite.css" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="container page-container">
+        <!-- Page Header -->
+        <div class="flex-between mb-6 flex-wrap flex-gap-4">
+          <div>
+            <h1 class="page-title">Attendance Records</h1>
+            <p class="page-subtitle">View and manage all attendance logs</p>
+          </div>
+          <button class="btn btn-primary" onclick="exportAttendance()">Export Data</button>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="card shadow-sm card-spacing">
+          <div class="card-body p-6">
+            <form onsubmit="filterRecords(event)" class="grid-auto-fit-sm align-end">
+              <div>
+                <label class="form-label text-sm">Date From</label>
+                <input type="date" id="filter-date-from" class="form-input" />
+              </div>
+              <div>
+                <label class="form-label text-sm">Date To</label>
+                <input type="date" id="filter-date-to" class="form-input" />
+              </div>
+              <div>
+                <label class="form-label text-sm">Department</label>
+                <select id="filter-department" class="form-input">
+                  <option value="">All Departments</option>
+                  <option value="Administration">Administration</option>
+                  <option value="Finance">Finance</option>
+                  <option value="IT">IT</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label text-sm">Staff</label>
+                <input type="text" id="filter-staff" class="form-input" placeholder="Staff ID or Name" />
+              </div>
+              <div class="flex flex-gap-2">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <button type="button" class="btn btn-outline" onclick="resetFilters()">Reset</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Attendance Table -->
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Staff Name</th>
+                    <th>Staff ID</th>
+                    <th>Department</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="attendance-records-table">
+                  <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      import { getAllAttendance, getAllStaff } from '/src/services/mock-data.js';
+      
+      let allAttendance = getAllAttendance();
+      let allStaff = getAllStaff();
+      
+      function getStaffInfo(staffId) {
+        return allStaff.find(s => s.id === staffId) || { name: 'Unknown', department: 'N/A' };
+      }
+      
+      function renderTable(records = allAttendance) {
+        const tbody = document.getElementById('attendance-records-table');
+        tbody.innerHTML = '';
+        
+        records.forEach(record => {
+          const staffInfo = getStaffInfo(record.staffId);
+          const row = document.createElement('tr');
+          const statusBadge = record.isLate
+            ? '<span class="badge badge-warning">Late</span>'
+            : '<span class="badge badge-success">Present</span>';
+          row.innerHTML = `
+            <td>${record.date}</td>
+            <td>${staffInfo.name}</td>
+            <td>${record.staffId}</td>
+            <td>${staffInfo.department}</td>
+            <td>${record.checkIn}</td>
+            <td>${record.checkOut}</td>
+            <td>${statusBadge}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+      
+      window.filterRecords = function(event) {
+        event.preventDefault();
+        // Filter logic would go here
+        renderTable();
+      };
+      
+      window.resetFilters = function() {
+        document.querySelector('form').reset();
+        renderTable();
+      };
+      
+      window.exportAttendance = function() {
+        alert('Exporting attendance data... (Feature coming soon)');
+      };
+      
+      renderTable();
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

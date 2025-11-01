@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attendance History - LG QAMS</title>
+    <link rel="stylesheet" href="/src/styles/flowbite-tokens.css" />
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/flowbite.css" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="container page-container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1 class="page-title">Attendance History</h1>
+          <p class="page-subtitle">View your complete attendance records</p>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="flex flex-wrap flex-gap-2 mb-6">
+          <button class="btn btn-primary" onclick="filterAttendance('all')">All</button>
+          <button class="btn btn-outline" onclick="filterAttendance('daily')">Daily</button>
+          <button class="btn btn-outline" onclick="filterAttendance('weekly')">Weekly</button>
+          <button class="btn btn-outline" onclick="filterAttendance('monthly')">Monthly</button>
+        </div>
+
+        <!-- Attendance Table -->
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="attendance-table-body">
+                  <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex-center flex-gap-2 mt-6">
+          <button class="btn btn-outline" onclick="previousPage()">Previous</button>
+          <span class="text-secondary p-4">
+            Page <span id="current-page">1</span> of <span id="total-pages">1</span>
+          </span>
+          <button class="btn btn-outline" onclick="nextPage()">Next</button>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      import { getCurrentUser, getStaffAttendance } from '/src/services/mock-data.js';
+      
+      let currentFilter = 'all';
+      let currentPage = 1;
+      const itemsPerPage = 10;
+      
+      const user = getCurrentUser();
+      let allAttendance = getStaffAttendance(user.id);
+      
+      function renderTable() {
+        const tbody = document.getElementById('attendance-table-body');
+        tbody.innerHTML = '';
+        
+        const filtered = filterAttendanceData(allAttendance, currentFilter);
+        const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+        
+        paginated.forEach(record => {
+          const row = document.createElement('tr');
+          const statusBadge = record.isLate 
+            ? '<span class="badge badge-warning">Late</span>'
+            : '<span class="badge badge-success">Present</span>';
+          row.innerHTML = `
+            <td>${record.date}</td>
+            <td>${record.checkIn}</td>
+            <td>${record.checkOut}</td>
+            <td>${statusBadge}</td>
+          `;
+          tbody.appendChild(row);
+        });
+        
+        const totalPages = Math.ceil(filtered.length / itemsPerPage);
+        document.getElementById('current-page').textContent = currentPage;
+        document.getElementById('total-pages').textContent = totalPages || 1;
+      }
+      
+      function filterAttendanceData(data, filter) {
+        if (filter === 'all') return data;
+        // Add more filtering logic here
+        return data;
+      }
+      
+      window.filterAttendance = function(filter) {
+        currentFilter = filter;
+        currentPage = 1;
+        renderTable();
+        
+        // Update button states
+        document.querySelectorAll('.btn-outline, .btn-primary').forEach(btn => {
+          btn.className = 'btn btn-outline';
+        });
+        event.target.className = 'btn btn-primary';
+      };
+      
+      window.previousPage = function() {
+        if (currentPage > 1) {
+          currentPage--;
+          renderTable();
+        }
+      };
+      
+      window.nextPage = function() {
+        const filtered = filterAttendanceData(allAttendance, currentFilter);
+        const totalPages = Math.ceil(filtered.length / itemsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderTable();
+        }
+      };
+      
+      renderTable();
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

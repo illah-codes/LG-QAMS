@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Staff Management - LG QAMS</title>
+    <link rel="stylesheet" href="/src/styles/flowbite-tokens.css" />
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/flowbite.css" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="container page-container">
+        <!-- Page Header -->
+        <div class="flex-between mb-6 flex-wrap flex-gap-4">
+          <div>
+            <h1 class="page-title">Staff Management</h1>
+            <p class="page-subtitle">Manage staff records and accounts</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddStaffModal()">Add New Staff</button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="mb-6">
+          <input
+            type="text"
+            id="staff-search"
+            class="form-input w-full max-w-500"
+            placeholder="Search by name, Staff ID, or department..."
+            oninput="filterStaff()"
+          />
+        </div>
+
+        <!-- Staff Table -->
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Staff ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="staff-table-body">
+                  <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Staff Modal -->
+      <div id="add-staff-modal" class="modal-overlay hidden">
+        <div class="card shadow-lg max-w-500 w-full modal-content">
+          <div class="card-header p-6 flex-between">
+            <h2 class="section-title">Add New Staff</h2>
+            <button onclick="closeAddStaffModal()" class="btn-close text-secondary">&times;</button>
+          </div>
+          <div class="card-body p-6">
+            <form onsubmit="addStaff(event)">
+              <div class="grid-2-col">
+                <div>
+                  <label class="form-label">Staff ID</label>
+                  <input type="text" id="new-staff-id" class="form-input" required />
+                </div>
+                <div>
+                  <label class="form-label">Full Name</label>
+                  <input type="text" id="new-staff-name" class="form-input" required />
+                </div>
+                <div>
+                  <label class="form-label">Email</label>
+                  <input type="email" id="new-staff-email" class="form-input" required />
+                </div>
+                <div>
+                  <label class="form-label">Department</label>
+                  <input type="text" id="new-staff-department" class="form-input" required />
+                </div>
+                <div>
+                  <label class="form-label">Role</label>
+                  <select id="new-staff-role" class="form-input" required>
+                    <option value="Staff">Staff</option>
+                    <option value="Admin">Admin</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex flex-gap-4 mt-6">
+                <button type="submit" class="btn btn-primary">Add Staff</button>
+                <button type="button" class="btn btn-outline" onclick="closeAddStaffModal()">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      import { getAllStaff } from '/src/services/mock-data.js';
+      
+      let allStaff = getAllStaff();
+      
+      function renderStaffTable(staffList = allStaff) {
+        const tbody = document.getElementById('staff-table-body');
+        tbody.innerHTML = '';
+        
+        staffList.forEach(staff => {
+          const row = document.createElement('tr');
+          const statusBadge = staff.status === 'active'
+            ? '<span class="badge badge-success">Active</span>'
+            : '<span class="badge badge-secondary">Inactive</span>';
+          row.innerHTML = `
+            <td>${staff.id}</td>
+            <td>${staff.name}</td>
+            <td>${staff.email}</td>
+            <td>${staff.department}</td>
+            <td>${staff.role}</td>
+            <td>${statusBadge}</td>
+            <td>
+              <div class="flex flex-gap-2">
+                <button class="btn btn-sm btn-outline" onclick="editStaff('${staff.id}')">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deactivateStaff('${staff.id}')">Deactivate</button>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+      
+      window.filterStaff = function() {
+        const search = document.getElementById('staff-search').value.toLowerCase();
+        const filtered = allStaff.filter(staff => 
+          staff.name.toLowerCase().includes(search) ||
+          staff.id.toLowerCase().includes(search) ||
+          staff.department.toLowerCase().includes(search)
+        );
+        renderStaffTable(filtered);
+      };
+      
+      window.openAddStaffModal = function() {
+        document.getElementById('add-staff-modal').classList.remove('hidden');
+      };
+      
+      window.closeAddStaffModal = function() {
+        document.getElementById('add-staff-modal').classList.add('hidden');
+        document.querySelector('#add-staff-modal form').reset();
+      };
+      
+      window.addStaff = function(event) {
+        event.preventDefault();
+        alert('Staff added successfully! (Feature coming soon)');
+        closeAddStaffModal();
+      };
+      
+      window.editStaff = function(staffId) {
+        alert(`Edit staff ${staffId} (Feature coming soon)`);
+      };
+      
+      window.deactivateStaff = function(staffId) {
+        if (confirm('Are you sure you want to deactivate this staff member?')) {
+          alert(`Staff ${staffId} deactivated (Feature coming soon)`);
+        }
+      };
+      
+      renderStaffTable();
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

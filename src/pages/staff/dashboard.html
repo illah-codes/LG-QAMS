@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - LG QAMS</title>
+    <link rel="stylesheet" href="/src/styles/flowbite-tokens.css" />
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/flowbite.css" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="container page-container">
+        <!-- Page Header -->
+        <div class="page-header mb-8">
+          <h1 class="page-title">
+            Staff Dashboard
+          </h1>
+          <p class="page-subtitle">
+            Welcome back, <strong id="user-name">Staff Member</strong>
+          </p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div id="stats-cards" class="grid-auto-fit mb-8">
+          <!-- Cards will be populated by JavaScript -->
+        </div>
+
+        <!-- Recent Attendance -->
+        <div class="card shadow-sm card-spacing">
+          <div class="card-header p-6">
+            <h2 class="section-title">
+              Recent Attendance
+            </h2>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-attendance-table">
+                  <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="flex flex-wrap flex-gap-4">
+          <a href="/staff/attendance" data-router class="btn btn-primary">View Full Attendance History</a>
+          <a href="/staff/reports" data-router class="btn btn-outline">View Reports</a>
+          <a href="/scan" data-router class="btn btn-secondary">Scan QR Code</a>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      import { createAttendanceCard } from '/src/components/attendance-card/attendance-card.js';
+      import { getCurrentUser, getStaffAttendance, mockStats } from '/src/services/mock-data.js';
+      
+      // Set user name
+      const user = getCurrentUser();
+      document.getElementById('user-name').textContent = user.name;
+      
+      // Create stat cards
+      const statsContainer = document.getElementById('stats-cards');
+      const cards = [
+        createAttendanceCard({ title: 'Present Days', value: mockStats.presentDays, icon: '✅', color: 'success' }),
+        createAttendanceCard({ title: 'Absences', value: mockStats.absences, icon: '❌', color: 'danger' }),
+        createAttendanceCard({ title: 'Lateness', value: mockStats.lateness, icon: '⏰', color: 'warning' }),
+        createAttendanceCard({ title: 'Total Working Days', value: mockStats.totalWorkingDays, icon: '📅', color: 'info' }),
+      ];
+      cards.forEach(card => statsContainer.appendChild(card));
+      
+      // Populate recent attendance
+      const attendance = getStaffAttendance(user.id);
+      const tableBody = document.getElementById('recent-attendance-table');
+      attendance.slice(0, 5).forEach(record => {
+        const row = document.createElement('tr');
+        const statusBadge = record.isLate 
+          ? '<span class="badge badge-warning">Late</span>'
+          : '<span class="badge badge-success">Present</span>';
+        row.innerHTML = `
+          <td>${record.date}</td>
+          <td>${record.checkIn}</td>
+          <td>${record.checkOut}</td>
+          <td>${statusBadge}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

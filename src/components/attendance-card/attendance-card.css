@@ -1,0 +1,9 @@
+/* Attendance Card Component Styles */
+.attendance-card {
+  transition: var(--flowbite-transition-shadow);
+}
+
+.attendance-card:hover {
+  box-shadow: var(--flowbite-shadow-md);
+}
+

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reports - LG QAMS</title>
+    <link rel="stylesheet" href="/src/styles/flowbite-tokens.css" />
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/flowbite.css" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="container page-container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1 class="page-title">Monthly Reports</h1>
+          <p class="page-subtitle">View and download your attendance reports</p>
+        </div>
+
+        <!-- Generate Report Section -->
+        <div class="card shadow-sm card-spacing">
+          <div class="card-header p-6">
+            <h2 class="section-title">Generate New Report</h2>
+          </div>
+          <div class="card-body p-6">
+            <form onsubmit="generateReport(event)" class="grid-auto-fit-sm align-end">
+              <div>
+                <label for="report-month" class="form-label">Month</label>
+                <input type="month" id="report-month" class="form-input" required />
+              </div>
+              <button type="submit" class="btn btn-primary">Generate Report</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Reports List -->
+        <div id="reports-list">
+          <!-- Reports will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      import { mockMonthlyReport } from '/src/services/mock-data.js';
+      
+      function renderReports() {
+        const container = document.getElementById('reports-list');
+        const report = mockMonthlyReport;
+        
+        const reportCard = document.createElement('div');
+        reportCard.className = 'card shadow-sm mb-4';
+        reportCard.innerHTML = `
+          <div class="card-body p-6">
+            <div class="flex-between mb-4">
+              <div>
+                <h3 class="text-xl font-semibold mb-2">${report.month}</h3>
+                <p class="text-secondary text-sm">Attendance Summary Report</p>
+              </div>
+              <div class="flex flex-gap-2">
+                <button class="btn btn-primary btn-sm" onclick="downloadReport('pdf', '${report.month}')">PDF</button>
+                <button class="btn btn-outline btn-sm" onclick="downloadReport('excel', '${report.month}')">Excel</button>
+              </div>
+            </div>
+            <div class="grid-auto-fit-sm">
+              <div>
+                <p class="text-secondary text-sm mb-1">Total Days</p>
+                <p class="text-lg font-bold">${report.totalWorkingDays}</p>
+              </div>
+              <div>
+                <p class="text-secondary text-sm mb-1">Present</p>
+                <p class="text-lg font-bold text-success">${report.presentDays}</p>
+              </div>
+              <div>
+                <p class="text-secondary text-sm mb-1">Absent</p>
+                <p class="text-lg font-bold text-danger">${report.absences}</p>
+              </div>
+              <div>
+                <p class="text-secondary text-sm mb-1">Average Check-In</p>
+                <p class="text-lg font-bold">${report.averageCheckIn}</p>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(reportCard);
+      }
+      
+      window.generateReport = function(event) {
+        event.preventDefault();
+        const month = document.getElementById('report-month').value;
+        alert(`Generating report for ${month}... (Feature coming soon)`);
+      };
+      
+      window.downloadReport = function(format, month) {
+        alert(`Downloading ${format.toUpperCase()} report for ${month}... (Feature coming soon)`);
+      };
+      
+      renderReports();
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

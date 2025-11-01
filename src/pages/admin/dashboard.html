@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - LG QAMS</title>
+    <link rel="stylesheet" href="/src/styles/flowbite-tokens.css" />
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/flowbite.css" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="container page-container">
+        <!-- Page Header -->
+        <div class="page-header mb-8">
+          <h1 class="page-title">Admin Dashboard</h1>
+          <p class="page-subtitle">Today's attendance overview and analytics</p>
+        </div>
+
+        <!-- Today's Statistics -->
+        <div id="today-stats" class="grid-auto-fit-sm mb-8">
+          <!-- Stats cards will be populated by JavaScript -->
+        </div>
+
+        <!-- Today's Attendance List -->
+        <div class="card shadow-sm card-spacing">
+          <div class="card-header p-6 flex-between">
+            <h2 class="section-title">Today's Attendance</h2>
+            <span class="text-secondary text-sm" id="today-date"></span>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Staff Name</th>
+                    <th>Department</th>
+                    <th>Check In</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="today-attendance-table">
+                  <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="flex flex-wrap flex-gap-4">
+          <a href="/admin/staff" data-router class="btn btn-primary">Manage Staff</a>
+          <a href="/admin/attendance" data-router class="btn btn-outline">View All Records</a>
+          <a href="/admin/reports" data-router class="btn btn-outline">Generate Reports</a>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      import { createAttendanceCard } from '/src/components/attendance-card/attendance-card.js';
+      import { getTodayAttendance } from '/src/services/mock-data.js';
+      
+      const today = getTodayAttendance();
+      
+      // Set today's date
+      document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      
+      // Create stat cards
+      const statsContainer = document.getElementById('today-stats');
+      const cards = [
+        createAttendanceCard({ title: 'Present Today', value: today.present, icon: '✅', color: 'success' }),
+        createAttendanceCard({ title: 'Absent Today', value: today.absent, icon: '❌', color: 'danger' }),
+        createAttendanceCard({ title: 'Late Today', value: today.late, icon: '⏰', color: 'warning' }),
+        createAttendanceCard({ title: 'Total Staff', value: today.total, icon: '👥', color: 'info' }),
+      ];
+      cards.forEach(card => statsContainer.appendChild(card));
+      
+      // Populate today's attendance table
+      const tableBody = document.getElementById('today-attendance-table');
+      today.staff.forEach(staff => {
+        const row = document.createElement('tr');
+        const statusBadge = staff.status === 'Present'
+          ? '<span class="badge badge-success">Present</span>'
+          : '';
+        row.innerHTML = `
+          <td>${staff.name}</td>
+          <td>Administration</td>
+          <td>${staff.checkIn}</td>
+          <td>${statusBadge}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

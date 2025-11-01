@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>System Settings - LG QAMS</title>
+    <link rel="stylesheet" href="/src/styles/flowbite-tokens.css" />
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/flowbite.css" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="container page-container max-width-container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1 class="page-title">System Settings</h1>
+          <p class="page-subtitle">Configure system parameters and preferences</p>
+        </div>
+
+        <!-- Office Hours Settings -->
+        <div class="card shadow-sm card-spacing">
+          <div class="card-header p-6">
+            <h2 class="section-title">Office Hours</h2>
+          </div>
+          <div class="card-body p-6">
+            <form onsubmit="saveOfficeHours(event)">
+              <div class="grid-2-col">
+                <div>
+                  <label class="form-label">Office Start Time</label>
+                  <input type="time" id="office-start" class="form-input" value="08:00" required />
+                </div>
+                <div>
+                  <label class="form-label">Office End Time</label>
+                  <input type="time" id="office-end" class="form-input" value="17:00" required />
+                </div>
+                <div>
+                  <label class="form-label">Late Threshold (minutes after start time)</label>
+                  <input type="number" id="late-threshold" class="form-input" value="15" min="0" required />
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary mt-6">Save Settings</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- System Configuration -->
+        <div class="card shadow-sm card-spacing">
+          <div class="card-header p-6">
+            <h2 class="section-title">System Configuration</h2>
+          </div>
+          <div class="card-body p-6">
+            <div class="grid-2-col">
+              <div class="flex-between p-4 bg-secondary rounded-lg">
+                <div>
+                  <h3 class="text-base font-semibold mb-1">IP Location Restriction</h3>
+                  <p class="text-secondary text-sm">Restrict attendance to office IP address</p>
+                </div>
+                <input type="checkbox" id="ip-restriction" />
+              </div>
+              <div class="flex-between p-4 bg-secondary rounded-lg">
+                <div>
+                  <h3 class="text-base font-semibold mb-1">Auto-generate Monthly Reports</h3>
+                  <p class="text-secondary text-sm">Automatically generate reports at month end</p>
+                </div>
+                <input type="checkbox" id="auto-reports" checked />
+              </div>
+            </div>
+            <button class="btn btn-primary mt-4" onclick="saveConfiguration()">Save Configuration</button>
+          </div>
+        </div>
+
+        <!-- Backup & Restore -->
+        <div class="card shadow-sm">
+          <div class="card-header p-6">
+            <h2 class="section-title">Data Management</h2>
+          </div>
+          <div class="card-body p-6">
+            <div class="grid-2-col">
+              <button class="btn btn-primary" onclick="backupData()">Backup Data</button>
+              <button class="btn btn-outline" onclick="restoreData()">Restore Data</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      window.saveOfficeHours = function(event) {
+        event.preventDefault();
+        alert('Office hours saved successfully! (Feature coming soon)');
+      };
+      
+      window.saveConfiguration = function() {
+        alert('Configuration saved successfully! (Feature coming soon)');
+      };
+      
+      window.backupData = function() {
+        alert('Backing up data... (Feature coming soon)');
+      };
+      
+      window.restoreData = function() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = function() {
+          alert('Data restored successfully! (Feature coming soon)');
+        };
+        input.click();
+      };
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

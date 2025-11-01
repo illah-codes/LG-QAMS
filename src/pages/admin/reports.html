@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reports & Analytics - LG QAMS</title>
+    <link rel="stylesheet" href="/src/styles/flowbite-tokens.css" />
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/flowbite.css" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="container page-container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1 class="page-title">Reports & Analytics</h1>
+          <p class="page-subtitle">Generate and export attendance reports</p>
+        </div>
+
+        <!-- Report Generation Form -->
+        <div class="card shadow-sm card-spacing">
+          <div class="card-header p-6">
+            <h2 class="section-title">Generate Report</h2>
+          </div>
+          <div class="card-body p-6">
+            <form onsubmit="generateReport(event)" class="grid-auto-fit-sm align-end">
+              <div>
+                <label class="form-label">Report Type</label>
+                <select id="report-type" class="form-input" required>
+                  <option value="monthly">Monthly Report</option>
+                  <option value="departmental">Departmental Report</option>
+                  <option value="individual">Individual Staff Report</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Month</label>
+                <input type="month" id="report-month" class="form-input" required />
+              </div>
+              <div>
+                <label class="form-label">Department</label>
+                <select id="report-department" class="form-input">
+                  <option value="">All Departments</option>
+                  <option value="Administration">Administration</option>
+                  <option value="Finance">Finance</option>
+                  <option value="IT">IT</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Generate Report</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Generated Reports -->
+        <div id="generated-reports">
+          <h2 class="section-title mb-4">Generated Reports</h2>
+          <!-- Reports will be listed here -->
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      window.generateReport = function(event) {
+        event.preventDefault();
+        const type = document.getElementById('report-type').value;
+        const month = document.getElementById('report-month').value;
+        const department = document.getElementById('report-department').value;
+        
+        alert(`Generating ${type} report for ${month}${department ? ' - ' + department : ''}... (Feature coming soon)`);
+      };
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

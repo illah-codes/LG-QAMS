@@ -230,10 +230,10 @@ class Router {
       await this.renderRoute({ page: this.notFoundHandler, title: '404 - Not Found' }, path);
     } else {
       app.innerHTML = `
-        <div style="text-align: center; padding: 3rem;">
-          <h1>404 - Page Not Found</h1>
-          <p>The page "${path}" could not be found.</p>
-          <a href="/" class="btn">Go Home</a>
+        <div class="text-center p-6">
+          <h1 class="text-4xl font-bold mb-4">404 - Page Not Found</h1>
+          <p class="text-secondary mb-6">The page "${path}" could not be found.</p>
+          <a href="/" data-router class="btn btn-primary">Go Home</a>
         </div>
       `;
     }

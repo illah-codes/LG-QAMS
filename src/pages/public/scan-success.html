@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scan Successful - LG QAMS</title>
+    <link rel="stylesheet" href="/src/styles/flowbite-tokens.css" />
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/flowbite.css" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="container page-container max-w-600">
+        <div class="card shadow-lg">
+          <div class="card-body p-6 text-center">
+            <!-- Success Icon -->
+            <div class="success-icon">
+              <span class="icon-xl">✅</span>
+            </div>
+
+            <!-- Success Message -->
+            <h1 class="text-2xl font-bold mb-4 text-success">
+              Attendance Recorded Successfully
+            </h1>
+
+            <div id="success-details" class="bg-secondary p-6 rounded-lg mb-6">
+              <p class="text-lg mb-2">
+                <strong id="action-type">Check-In</strong> recorded for
+              </p>
+              <p class="text-xl font-bold text-primary mb-2">
+                <span id="staff-name">Olaitan</span>
+              </p>
+              <p class="text-base text-secondary">
+                at <span id="timestamp">08:12 AM</span>
+              </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex-center flex-wrap flex-gap-4">
+              <a href="/scan" data-router class="btn btn-primary">Scan Again</a>
+              <a href="/staff/dashboard" data-router class="btn btn-outline">Go to Dashboard</a>
+              <a href="/" data-router class="btn btn-secondary">Back to Home</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      // Get data from URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const name = urlParams.get('name') || 'Olaitan';
+      const time = urlParams.get('time') || new Date().toLocaleTimeString();
+      const action = urlParams.get('action') || 'Check-In';
+      
+      document.getElementById('staff-name').textContent = name;
+      document.getElementById('timestamp').textContent = time;
+      document.getElementById('action-type').textContent = action;
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

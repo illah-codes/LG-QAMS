@@ -1,0 +1,25 @@
+/* QR Code component styles */
+.qr-code-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--flowbite-space-4);
+  padding: var(--flowbite-space-4);
+  background-color: var(--flowbite-bg-primary);
+  border-radius: var(--flowbite-radius-lg);
+}
+
+.qr-code-actions {
+  display: flex;
+  gap: var(--flowbite-space-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.qr-code-instructions {
+  text-align: center;
+  color: var(--flowbite-text-secondary);
+  font-size: var(--flowbite-text-sm);
+  margin-top: var(--flowbite-space-2);
+}
+

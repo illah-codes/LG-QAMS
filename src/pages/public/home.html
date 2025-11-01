@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home - LG QAMS</title>
+    <link rel="stylesheet" href="/src/styles/flowbite-tokens.css" />
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/flowbite.css" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Hero Section -->
+      <section class="container hero">
+        <div class="text-center max-w-800">
+          <h1 class="hero-title">
+            Local Government QR Code Attendance Management System
+          </h1>
+          <p class="hero-subtitle">
+            Streamline your attendance tracking with our digital QR code system. Quick, accurate, and secure.
+          </p>
+        </div>
+
+        <!-- QR Code Section -->
+        <div class="card shadow-lg max-w-500 mb-8">
+          <div class="card-body p-6 text-center">
+            <h2 class="text-2xl mb-4">Scan QR Code to Check In/Out</h2>
+            <div id="qr-code-display" class="qr-code-container mt-4"></div>
+            <div class="qr-code-actions">
+              <button class="btn btn-primary" onclick="downloadQR()">Download QR Code</button>
+              <button class="btn btn-secondary" onclick="printQR()">Print QR Code</button>
+            </div>
+            <p class="qr-code-instructions">
+              Staff members can scan this QR code with their mobile devices to check in or check out.
+            </p>
+          </div>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="grid-auto-fit mb-8">
+          <div class="card shadow-sm">
+            <div class="card-body p-6">
+              <div class="icon-large mb-2">📱</div>
+              <h3 class="text-xl mb-2">Easy Check-In</h3>
+              <p class="text-secondary text-sm">
+                Simply scan the QR code and log in to record your attendance.
+              </p>
+            </div>
+          </div>
+          <div class="card shadow-sm">
+            <div class="card-body p-6">
+              <div class="icon-large mb-2">⏰</div>
+              <h3 class="text-xl mb-2">Accurate Tracking</h3>
+              <p class="text-secondary text-sm">
+                Automatic timestamp recording ensures accurate attendance data.
+              </p>
+            </div>
+          </div>
+          <div class="card shadow-sm">
+            <div class="card-body p-6">
+              <div class="icon-large mb-2">📊</div>
+              <h3 class="text-xl mb-2">Detailed Reports</h3>
+              <p class="text-secondary text-sm">
+                View comprehensive attendance reports and analytics.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="text-center">
+          <a href="/scan" data-router class="btn btn-primary btn-lg flex-gap-4">Go to Scan Page</a>
+          <a href="/login" data-router class="btn btn-outline btn-lg">Staff Login</a>
+        </div>
+      </section>
+    </div>
+    <script type="module">
+      import { generateQRCode } from '/src/components/qr-code/qr-code.js';
+      
+      window.downloadQR = function() {
+        const canvas = document.querySelector('#qr-code-display canvas');
+        if (canvas) {
+          import('/src/components/qr-code/qr-code.js').then(({ downloadQRCode }) => {
+            downloadQRCode(canvas, 'lg-qams-qrcode.png');
+          });
+        }
+      };
+      
+      window.printQR = function() {
+        const canvas = document.querySelector('#qr-code-display canvas');
+        if (canvas) {
+          import('/src/components/qr-code/qr-code.js').then(({ printQRCode }) => {
+            printQRCode(canvas);
+          });
+        }
+      };
+      
+      // Generate QR code on page load
+      const qrContainer = document.getElementById('qr-code-display');
+      if (qrContainer) {
+        const currentUrl = window.location.origin + '/scan';
+        generateQRCode(qrContainer, currentUrl, { size: 256 });
+      }
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
