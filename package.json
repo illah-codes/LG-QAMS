@@ -13,6 +13,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "flowbite": "^3.1.2"
+  },
   "devDependencies": {
     "vite": "^5.0.0",
     "eslint": "^8.50.0",

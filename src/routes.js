@@ -32,9 +32,15 @@ router.beforeEach((to, from) => {
   console.log(`Navigating from ${from?.path || '/'} to ${to.path}`);
 });
 
-router.afterEach((to, from) => {
+router.afterEach(async (to, from) => {
   // You can add analytics, cleanup, etc.
   console.log(`Navigation to ${to.path} complete`);
+
+  // Re-initialize Flowbite components after route change
+  const { initFlowbite } = await import('flowbite');
+  setTimeout(() => {
+    initFlowbite();
+  }, 0);
 });
 
 export default router;

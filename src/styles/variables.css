@@ -1,87 +1,90 @@
 /**
  * CSS Custom Properties (Variables)
+ * Now using Flowbite design system tokens
  */
 
+@import './flowbite-tokens.css';
+
 :root {
-  /* Colors */
-  --color-primary: #007bff;
-  --color-primary-dark: #0056b3;
-  --color-primary-light: #80bdff;
-  --color-secondary: #6c757d;
-  --color-success: #28a745;
-  --color-danger: #dc3545;
-  --color-warning: #ffc107;
-  --color-info: #17a2b8;
   
-  /* Neutral Colors */
+  /* Colors - mapped to Flowbite */
+  --color-primary: var(--flowbite-primary);
+  --color-primary-dark: var(--flowbite-primary-dark);
+  --color-primary-light: var(--flowbite-primary-light);
+  --color-secondary: var(--flowbite-secondary);
+  --color-success: var(--flowbite-success);
+  --color-danger: var(--flowbite-danger);
+  --color-warning: var(--flowbite-warning);
+  --color-info: var(--flowbite-info);
+  
+  /* Neutral Colors - mapped to Flowbite grays */
   --color-white: #ffffff;
   --color-black: #000000;
-  --color-gray-100: #f8f9fa;
-  --color-gray-200: #e9ecef;
-  --color-gray-300: #dee2e6;
-  --color-gray-400: #ced4da;
-  --color-gray-500: #adb5bd;
-  --color-gray-600: #6c757d;
-  --color-gray-700: #495057;
-  --color-gray-800: #343a40;
-  --color-gray-900: #212529;
+  --color-gray-100: var(--flowbite-gray-100);
+  --color-gray-200: var(--flowbite-gray-200);
+  --color-gray-300: var(--flowbite-gray-300);
+  --color-gray-400: var(--flowbite-gray-400);
+  --color-gray-500: var(--flowbite-gray-500);
+  --color-gray-600: var(--flowbite-gray-600);
+  --color-gray-700: var(--flowbite-gray-700);
+  --color-gray-800: var(--flowbite-gray-800);
+  --color-gray-900: var(--flowbite-gray-900);
   
-  /* Typography */
-  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+  /* Typography - mapped to Flowbite */
+  --font-family-base: var(--flowbite-font-sans);
+  --font-family-mono: var(--flowbite-font-mono);
   
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
-  --font-size-3xl: 1.875rem;
-  --font-size-4xl: 2.25rem;
+  --font-size-xs: var(--flowbite-text-xs);
+  --font-size-sm: var(--flowbite-text-sm);
+  --font-size-base: var(--flowbite-text-base);
+  --font-size-lg: var(--flowbite-text-lg);
+  --font-size-xl: var(--flowbite-text-xl);
+  --font-size-2xl: var(--flowbite-text-2xl);
+  --font-size-3xl: var(--flowbite-text-3xl);
+  --font-size-4xl: var(--flowbite-text-4xl);
   
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
+  --font-weight-normal: var(--flowbite-font-normal);
+  --font-weight-medium: var(--flowbite-font-medium);
+  --font-weight-semibold: var(--flowbite-font-semibold);
+  --font-weight-bold: var(--flowbite-font-bold);
   
-  --line-height-tight: 1.25;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.75;
+  --line-height-tight: var(--flowbite-leading-tight);
+  --line-height-normal: var(--flowbite-leading-normal);
+  --line-height-relaxed: var(--flowbite-leading-relaxed);
   
-  /* Spacing */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-2xl: 3rem;
-  --spacing-3xl: 4rem;
+  /* Spacing - mapped to Flowbite */
+  --spacing-xs: var(--flowbite-space-1);
+  --spacing-sm: var(--flowbite-space-2);
+  --spacing-md: var(--flowbite-space-4);
+  --spacing-lg: var(--flowbite-space-6);
+  --spacing-xl: var(--flowbite-space-8);
+  --spacing-2xl: var(--flowbite-space-12);
+  --spacing-3xl: var(--flowbite-space-16);
   
   /* Layout */
-  --container-max-width: 1200px;
-  --border-radius-sm: 0.25rem;
-  --border-radius-md: 0.5rem;
-  --border-radius-lg: 0.75rem;
-  --border-radius-xl: 1rem;
+  --container-max-width: var(--flowbite-container-max-width);
+  --border-radius-sm: var(--flowbite-radius-sm);
+  --border-radius-md: var(--flowbite-radius-md);
+  --border-radius-lg: var(--flowbite-radius-lg);
+  --border-radius-xl: var(--flowbite-radius-xl);
   
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  /* Shadows - mapped to Flowbite */
+  --shadow-sm: var(--flowbite-shadow-sm);
+  --shadow-md: var(--flowbite-shadow-md);
+  --shadow-lg: var(--flowbite-shadow-lg);
+  --shadow-xl: var(--flowbite-shadow-xl);
   
-  /* Transitions */
-  --transition-fast: 150ms ease-in-out;
-  --transition-base: 250ms ease-in-out;
-  --transition-slow: 350ms ease-in-out;
+  /* Transitions - mapped to Flowbite */
+  --transition-fast: var(--flowbite-transition-base);
+  --transition-base: var(--flowbite-transition-base);
+  --transition-slow: var(--flowbite-transition-base);
   
-  /* Z-index scale */
-  --z-index-dropdown: 1000;
-  --z-index-sticky: 1020;
-  --z-index-fixed: 1030;
-  --z-index-modal-backdrop: 1040;
-  --z-index-modal: 1050;
-  --z-index-popover: 1060;
-  --z-index-tooltip: 1070;
+  /* Z-index - mapped to Flowbite */
+  --z-index-dropdown: var(--flowbite-z-dropdown);
+  --z-index-sticky: var(--flowbite-z-sticky);
+  --z-index-fixed: var(--flowbite-z-fixed);
+  --z-index-modal-backdrop: var(--flowbite-z-modal-backdrop);
+  --z-index-modal: var(--flowbite-z-modal);
+  --z-index-popover: var(--flowbite-z-popover);
+  --z-index-tooltip: var(--flowbite-z-tooltip);
 }
-

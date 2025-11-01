@@ -18,62 +18,65 @@ html {
 }
 
 body {
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
-  color: var(--color-gray-900);
-  background-color: var(--color-white);
+  font-family: var(--flowbite-font-sans);
+  font-size: var(--flowbite-text-base);
+  line-height: var(--flowbite-leading-normal);
+  color: var(--flowbite-text-primary);
+  background-color: var(--flowbite-bg-primary);
 }
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-tight);
-  margin-bottom: var(--spacing-md);
+  font-weight: var(--flowbite-font-bold);
+  line-height: var(--flowbite-leading-tight);
+  margin-bottom: var(--flowbite-space-4);
+  color: var(--flowbite-text-primary);
 }
 
 h1 {
-  font-size: var(--font-size-4xl);
+  font-size: var(--flowbite-text-4xl);
 }
 
 h2 {
-  font-size: var(--font-size-3xl);
+  font-size: var(--flowbite-text-3xl);
 }
 
 h3 {
-  font-size: var(--font-size-2xl);
+  font-size: var(--flowbite-text-2xl);
 }
 
 h4 {
-  font-size: var(--font-size-xl);
+  font-size: var(--flowbite-text-xl);
 }
 
 h5 {
-  font-size: var(--font-size-lg);
+  font-size: var(--flowbite-text-lg);
 }
 
 h6 {
-  font-size: var(--font-size-base);
+  font-size: var(--flowbite-text-base);
 }
 
 p {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--flowbite-space-4);
+  color: var(--flowbite-text-primary);
 }
 
 a {
-  color: var(--color-primary);
+  color: var(--flowbite-primary);
   text-decoration: none;
-  transition: color var(--transition-fast);
+  transition: var(--flowbite-transition-colors);
 }
 
 a:hover {
-  color: var(--color-primary-dark);
+  color: var(--flowbite-primary-hover);
 }
 
 /* Lists */
 ul, ol {
-  margin-bottom: var(--spacing-md);
-  padding-left: var(--spacing-xl);
+  margin-bottom: var(--flowbite-space-4);
+  padding-left: var(--flowbite-space-8);
+  color: var(--flowbite-text-primary);
 }
 
 /* Images */
@@ -86,11 +89,11 @@ img {
 /* Container */
 .container {
   width: 100%;
-  max-width: var(--container-max-width);
+  max-width: var(--flowbite-container-max-width);
   margin-left: auto;
   margin-right: auto;
-  padding-left: var(--spacing-md);
-  padding-right: var(--spacing-md);
+  padding-left: var(--flowbite-space-4);
+  padding-right: var(--flowbite-space-4);
 }
 
 /* Utility classes */

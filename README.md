@@ -7,6 +7,7 @@ A modern, clean, and modular pure JavaScript front-end project built with Vite.
 - 🚀 **Vite** - Lightning fast build tool and dev server
 - 📦 **Pure JavaScript** - No frameworks, just vanilla JS with ES modules
 - 🎨 **Modular Architecture** - Organized structure with pages, components, and utils
+- 🎨 **Flowbite Design System** - Complete design system with colors, typography, spacing, and components
 - 🛠️ **Development Tools** - ESLint and Prettier configured
 - 🎯 **Clean Code** - Maintainable and easy to understand
 
@@ -39,8 +40,10 @@ lg-qams/
 │   │   ├── router.js      # Router implementation
 │   │   └── navigation.js  # Navigation helpers
 │   ├── styles/
-│   │   ├── main.css       # Global stylesheet
-│   │   └── variables.css  # CSS variables
+│   │   ├── main.css           # Global stylesheet
+│   │   ├── variables.css      # CSS variables (backward compatibility)
+│   │   ├── flowbite-tokens.css # Flowbite design tokens
+│   │   └── flowbite.css       # Flowbite component styles
 │   └── assets/            # Static assets (images, etc.)
 └── public/                # Public assets served as-is
 ```
@@ -106,6 +109,50 @@ The project uses path aliases configured in `vite.config.js` for cleaner imports
 - `@utils/` - `src/utils/`
 - `@styles/` - `src/styles/`
 - `@assets/` - `src/assets/`
+
+## Flowbite Design System
+
+This project uses **Flowbite design system** with regular CSS (no Tailwind). All Flowbite design tokens are available as CSS variables.
+
+### Design Tokens
+
+All Flowbite design tokens are available in `src/styles/flowbite-tokens.css`:
+
+- **Colors**: Complete color palette (blue, gray, green, red, yellow, purple, pink) with semantic aliases
+- **Typography**: Font families, sizes, weights, line heights, letter spacing
+- **Spacing**: Consistent spacing scale (0.25rem to 8rem)
+- **Border Radius**: Rounded corners scale
+- **Shadows**: Shadow utilities
+- **Transitions**: Transition timing functions
+- **Z-Index**: Layering scale
+
+### Using Flowbite Tokens
+
+Use CSS variables in your styles:
+
+```css
+.my-element {
+  color: var(--flowbite-primary);
+  padding: var(--flowbite-space-4);
+  border-radius: var(--flowbite-radius-lg);
+  font-size: var(--flowbite-text-lg);
+}
+```
+
+### Flowbite Components
+
+Pre-built component styles are available in `src/styles/flowbite.css`:
+
+- **Buttons**: `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-success`, `.btn-danger`, `.btn-warning`, `.btn-outline`
+- **Navbar**: `.navbar`, `.navbar-container`, `.navbar-brand`, `.navbar-menu`, `.navbar-link`
+- **Cards**: `.card`, `.card-header`, `.card-body`, `.card-footer`
+- **Forms**: `.form-input`, `.form-label`
+
+### Flowbite JavaScript
+
+Flowbite JavaScript is initialized automatically. Interactive components (modals, dropdowns, tooltips) are available through Flowbite's JavaScript API.
+
+See [Flowbite Documentation](https://flowbite.com/docs/getting-started/introduction/) for component usage.
 
 ## Code Style
 

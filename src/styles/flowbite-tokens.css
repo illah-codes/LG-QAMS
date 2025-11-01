@@ -1,0 +1,253 @@
+/**
+ * Flowbite Design System Tokens
+ * Extracted from Flowbite/Tailwind design system
+ * These tokens match Flowbite's design system values
+ */
+
+:root {
+  /* ===== Colors ===== */
+  
+  /* Blue (Primary) - Flowbite's primary color */
+  --flowbite-blue-50: #eff6ff;
+  --flowbite-blue-100: #dbeafe;
+  --flowbite-blue-200: #bfdbfe;
+  --flowbite-blue-300: #93c5fd;
+  --flowbite-blue-400: #60a5fa;
+  --flowbite-blue-500: #3b82f6;
+  --flowbite-blue-600: #2563eb;
+  --flowbite-blue-700: #1d4ed8;
+  --flowbite-blue-800: #1e40af;
+  --flowbite-blue-900: #1e3a8a;
+  --flowbite-blue-950: #172554;
+
+  /* Gray Scale */
+  --flowbite-gray-50: #f9fafb;
+  --flowbite-gray-100: #f3f4f6;
+  --flowbite-gray-200: #e5e7eb;
+  --flowbite-gray-300: #d1d5db;
+  --flowbite-gray-400: #9ca3af;
+  --flowbite-gray-500: #6b7280;
+  --flowbite-gray-600: #4b5563;
+  --flowbite-gray-700: #374151;
+  --flowbite-gray-800: #1f2937;
+  --flowbite-gray-900: #111827;
+  --flowbite-gray-950: #030712;
+
+  /* Red (Danger) */
+  --flowbite-red-50: #fef2f2;
+  --flowbite-red-100: #fee2e2;
+  --flowbite-red-200: #fecaca;
+  --flowbite-red-300: #fca5a5;
+  --flowbite-red-400: #f87171;
+  --flowbite-red-500: #ef4444;
+  --flowbite-red-600: #dc2626;
+  --flowbite-red-700: #b91c1c;
+  --flowbite-red-800: #991b1b;
+  --flowbite-red-900: #7f1d1d;
+
+  /* Green (Success) */
+  --flowbite-green-50: #f0fdf4;
+  --flowbite-green-100: #dcfce7;
+  --flowbite-green-200: #bbf7d0;
+  --flowbite-green-300: #86efac;
+  --flowbite-green-400: #4ade80;
+  --flowbite-green-500: #22c55e;
+  --flowbite-green-600: #16a34a;
+  --flowbite-green-700: #15803d;
+  --flowbite-green-800: #166534;
+  --flowbite-green-900: #14532d;
+
+  /* Yellow (Warning) */
+  --flowbite-yellow-50: #fefce8;
+  --flowbite-yellow-100: #fef9c3;
+  --flowbite-yellow-200: #fef08a;
+  --flowbite-yellow-300: #fde047;
+  --flowbite-yellow-400: #facc15;
+  --flowbite-yellow-500: #eab308;
+  --flowbite-yellow-600: #ca8a04;
+  --flowbite-yellow-700: #a16207;
+  --flowbite-yellow-800: #854d0e;
+  --flowbite-yellow-900: #713f12;
+
+  /* Purple */
+  --flowbite-purple-50: #faf5ff;
+  --flowbite-purple-100: #f3e8ff;
+  --flowbite-purple-200: #e9d5ff;
+  --flowbite-purple-300: #d8b4fe;
+  --flowbite-purple-400: #c084fc;
+  --flowbite-purple-500: #a855f7;
+  --flowbite-purple-600: #9333ea;
+  --flowbite-purple-700: #7e22ce;
+  --flowbite-purple-800: #6b21a8;
+  --flowbite-purple-900: #581c87;
+
+  /* Pink */
+  --flowbite-pink-50: #fdf2f8;
+  --flowbite-pink-100: #fce7f3;
+  --flowbite-pink-200: #fbcfe8;
+  --flowbite-pink-300: #f9a8d4;
+  --flowbite-pink-400: #f472b6;
+  --flowbite-pink-500: #ec4899;
+  --flowbite-pink-600: #db2777;
+  --flowbite-pink-700: #be185d;
+  --flowbite-pink-800: #9f1239;
+  --flowbite-pink-900: #831843;
+
+  /* Semantic Color Aliases (Flowbite Defaults) */
+  --flowbite-primary: var(--flowbite-blue-600);
+  --flowbite-primary-hover: var(--flowbite-blue-700);
+  --flowbite-primary-light: var(--flowbite-blue-100);
+  --flowbite-primary-dark: var(--flowbite-blue-800);
+  
+  --flowbite-secondary: var(--flowbite-gray-600);
+  --flowbite-secondary-hover: var(--flowbite-gray-700);
+  
+  --flowbite-success: var(--flowbite-green-600);
+  --flowbite-success-hover: var(--flowbite-green-700);
+  --flowbite-success-light: var(--flowbite-green-100);
+  
+  --flowbite-danger: var(--flowbite-red-600);
+  --flowbite-danger-hover: var(--flowbite-red-700);
+  --flowbite-danger-light: var(--flowbite-red-100);
+  
+  --flowbite-warning: var(--flowbite-yellow-500);
+  --flowbite-warning-hover: var(--flowbite-yellow-600);
+  --flowbite-warning-light: var(--flowbite-yellow-100);
+  
+  --flowbite-info: var(--flowbite-blue-500);
+  --flowbite-info-hover: var(--flowbite-blue-600);
+  --flowbite-info-light: var(--flowbite-blue-100);
+
+  /* Text Colors */
+  --flowbite-text-primary: var(--flowbite-gray-900);
+  --flowbite-text-secondary: var(--flowbite-gray-600);
+  --flowbite-text-muted: var(--flowbite-gray-500);
+  --flowbite-text-inverse: #ffffff;
+
+  /* Background Colors */
+  --flowbite-bg-primary: #ffffff;
+  --flowbite-bg-secondary: var(--flowbite-gray-50);
+  --flowbite-bg-tertiary: var(--flowbite-gray-100);
+  --flowbite-bg-dark: var(--flowbite-gray-900);
+
+  /* Border Colors */
+  --flowbite-border-color: var(--flowbite-gray-300);
+  --flowbite-border-color-dark: var(--flowbite-gray-400);
+
+  /* ===== Typography ===== */
+  
+  /* Font Families */
+  --flowbite-font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --flowbite-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Font Sizes */
+  --flowbite-text-xs: 0.75rem;      /* 12px */
+  --flowbite-text-sm: 0.875rem;     /* 14px */
+  --flowbite-text-base: 1rem;       /* 16px */
+  --flowbite-text-lg: 1.125rem;     /* 18px */
+  --flowbite-text-xl: 1.25rem;      /* 20px */
+  --flowbite-text-2xl: 1.5rem;      /* 24px */
+  --flowbite-text-3xl: 1.875rem;    /* 30px */
+  --flowbite-text-4xl: 2.25rem;     /* 36px */
+  --flowbite-text-5xl: 3rem;        /* 48px */
+  --flowbite-text-6xl: 3.75rem;     /* 60px */
+
+  /* Font Weights */
+  --flowbite-font-thin: 100;
+  --flowbite-font-extralight: 200;
+  --flowbite-font-light: 300;
+  --flowbite-font-normal: 400;
+  --flowbite-font-medium: 500;
+  --flowbite-font-semibold: 600;
+  --flowbite-font-bold: 700;
+  --flowbite-font-extrabold: 800;
+  --flowbite-font-black: 900;
+
+  /* Line Heights */
+  --flowbite-leading-none: 1;
+  --flowbite-leading-tight: 1.25;
+  --flowbite-leading-snug: 1.375;
+  --flowbite-leading-normal: 1.5;
+  --flowbite-leading-relaxed: 1.625;
+  --flowbite-leading-loose: 2;
+
+  /* Letter Spacing */
+  --flowbite-tracking-tighter: -0.05em;
+  --flowbite-tracking-tight: -0.025em;
+  --flowbite-tracking-normal: 0em;
+  --flowbite-tracking-wide: 0.025em;
+  --flowbite-tracking-wider: 0.05em;
+  --flowbite-tracking-widest: 0.1em;
+
+  /* ===== Spacing ===== */
+  --flowbite-space-0: 0;
+  --flowbite-space-1: 0.25rem;    /* 4px */
+  --flowbite-space-2: 0.5rem;      /* 8px */
+  --flowbite-space-3: 0.75rem;     /* 12px */
+  --flowbite-space-4: 1rem;       /* 16px */
+  --flowbite-space-5: 1.25rem;     /* 20px */
+  --flowbite-space-6: 1.5rem;     /* 24px */
+  --flowbite-space-7: 1.75rem;    /* 28px */
+  --flowbite-space-8: 2rem;        /* 32px */
+  --flowbite-space-9: 2.25rem;    /* 36px */
+  --flowbite-space-10: 2.5rem;     /* 40px */
+  --flowbite-space-11: 2.75rem;   /* 44px */
+  --flowbite-space-12: 3rem;       /* 48px */
+  --flowbite-space-14: 3.5rem;     /* 56px */
+  --flowbite-space-16: 4rem;       /* 64px */
+  --flowbite-space-20: 5rem;       /* 80px */
+  --flowbite-space-24: 6rem;       /* 96px */
+  --flowbite-space-28: 7rem;       /* 112px */
+  --flowbite-space-32: 8rem;       /* 128px */
+
+  /* ===== Border Radius ===== */
+  --flowbite-radius-none: 0;
+  --flowbite-radius-sm: 0.125rem;   /* 2px */
+  --flowbite-radius-base: 0.25rem;  /* 4px */
+  --flowbite-radius-md: 0.375rem;   /* 6px */
+  --flowbite-radius-lg: 0.5rem;     /* 8px */
+  --flowbite-radius-xl: 0.75rem;    /* 12px */
+  --flowbite-radius-2xl: 1rem;      /* 16px */
+  --flowbite-radius-3xl: 1.5rem;    /* 24px */
+  --flowbite-radius-full: 9999px;
+
+  /* ===== Shadows ===== */
+  --flowbite-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --flowbite-shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --flowbite-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --flowbite-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --flowbite-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --flowbite-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --flowbite-shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  --flowbite-shadow-none: 0 0 #0000;
+
+  /* ===== Transitions ===== */
+  --flowbite-transition-none: none;
+  --flowbite-transition-all: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --flowbite-transition-base: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --flowbite-transition-colors: color 150ms cubic-bezier(0.4, 0, 0.2, 1), background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --flowbite-transition-opacity: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --flowbite-transition-shadow: box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --flowbite-transition-transform: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ===== Z-Index ===== */
+  --flowbite-z-0: 0;
+  --flowbite-z-10: 10;
+  --flowbite-z-20: 20;
+  --flowbite-z-30: 30;
+  --flowbite-z-40: 40;
+  --flowbite-z-50: 50;
+  --flowbite-z-auto: auto;
+  --flowbite-z-dropdown: 1000;
+  --flowbite-z-sticky: 1020;
+  --flowbite-z-fixed: 1030;
+  --flowbite-z-modal-backdrop: 1040;
+  --flowbite-z-modal: 1050;
+  --flowbite-z-popover: 1060;
+  --flowbite-z-tooltip: 1070;
+
+  /* ===== Container ===== */
+  --flowbite-container-padding: 1rem;
+  --flowbite-container-max-width: 1280px;
+}
+

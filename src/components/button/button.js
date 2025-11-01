@@ -20,18 +20,20 @@ export function createButton({
   disabled = false,
 }) {
   const button = document.createElement('button');
-  button.className = `btn btn--${variant}`;
+  button.className = `btn btn-${variant}`;
   button.textContent = text;
   button.disabled = disabled;
-  
-  if (size !== 'medium') {
-    button.classList.add(`btn--${size}`);
+
+  if (size === 'small') {
+    button.classList.add('btn-sm');
+  } else if (size === 'large') {
+    button.classList.add('btn-lg');
   }
-  
+
   if (onClick) {
     button.addEventListener('click', onClick);
   }
-  
+
   return button;
 }
 
@@ -41,10 +43,9 @@ export function createButton({
  */
 export function initButtons(container) {
   const buttons = container.querySelectorAll('.btn');
-  buttons.forEach(button => {
+  buttons.forEach((button) => {
     // Add any common button initialization logic here
     button.setAttribute('role', 'button');
     button.setAttribute('tabindex', button.disabled ? '-1' : '0');
   });
 }
-

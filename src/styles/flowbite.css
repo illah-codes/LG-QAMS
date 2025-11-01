@@ -1,0 +1,279 @@
+/**
+ * Flowbite Component Styles
+ * Based on Flowbite design system
+ * These are the core component styles that work with Flowbite JavaScript
+ */
+
+/* Button Components */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--flowbite-space-2) var(--flowbite-space-4);
+  font-size: var(--flowbite-text-sm);
+  font-weight: var(--flowbite-font-medium);
+  line-height: var(--flowbite-leading-normal);
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: var(--flowbite-radius-lg);
+  cursor: pointer;
+  transition: var(--flowbite-transition-colors);
+  background-color: var(--flowbite-primary);
+  color: var(--flowbite-text-inverse);
+}
+
+.btn:hover {
+  background-color: var(--flowbite-primary-hover);
+}
+
+.btn:focus {
+  outline: 2px solid var(--flowbite-primary);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-sm {
+  padding: var(--flowbite-space-1) var(--flowbite-space-3);
+  font-size: var(--flowbite-text-xs);
+}
+
+.btn-lg {
+  padding: var(--flowbite-space-3) var(--flowbite-space-6);
+  font-size: var(--flowbite-text-base);
+}
+
+.btn-primary {
+  background-color: var(--flowbite-primary);
+  color: var(--flowbite-text-inverse);
+}
+
+.btn-primary:hover {
+  background-color: var(--flowbite-primary-hover);
+}
+
+.btn-secondary {
+  background-color: var(--flowbite-secondary);
+  color: var(--flowbite-text-inverse);
+}
+
+.btn-secondary:hover {
+  background-color: var(--flowbite-secondary-hover);
+}
+
+.btn-success {
+  background-color: var(--flowbite-success);
+  color: var(--flowbite-text-inverse);
+}
+
+.btn-success:hover {
+  background-color: var(--flowbite-success-hover);
+}
+
+.btn-danger {
+  background-color: var(--flowbite-danger);
+  color: var(--flowbite-text-inverse);
+}
+
+.btn-danger:hover {
+  background-color: var(--flowbite-danger-hover);
+}
+
+.btn-warning {
+  background-color: var(--flowbite-warning);
+  color: var(--flowbite-gray-900);
+}
+
+.btn-warning:hover {
+  background-color: var(--flowbite-warning-hover);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: var(--flowbite-primary);
+  color: var(--flowbite-primary);
+}
+
+.btn-outline:hover {
+  background-color: var(--flowbite-primary);
+  color: var(--flowbite-text-inverse);
+}
+
+/* Navbar Component */
+.navbar {
+  background-color: var(--flowbite-bg-primary);
+  border-bottom: 1px solid var(--flowbite-border-color);
+  padding: var(--flowbite-space-4) 0;
+}
+
+.navbar-container {
+  max-width: var(--flowbite-container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--flowbite-space-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-brand {
+  font-size: var(--flowbite-text-xl);
+  font-weight: var(--flowbite-font-bold);
+  color: var(--flowbite-primary);
+  text-decoration: none;
+}
+
+.navbar-menu {
+  display: flex;
+  list-style: none;
+  gap: var(--flowbite-space-6);
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-link {
+  color: var(--flowbite-text-secondary);
+  font-weight: var(--flowbite-font-medium);
+  text-decoration: none;
+  transition: var(--flowbite-transition-colors);
+  padding: var(--flowbite-space-1) var(--flowbite-space-2);
+  border-radius: var(--flowbite-radius-md);
+}
+
+.navbar-link:hover {
+  color: var(--flowbite-primary);
+  background-color: var(--flowbite-primary-light);
+}
+
+/* Card Component */
+.card {
+  background-color: var(--flowbite-bg-primary);
+  border: 1px solid var(--flowbite-border-color);
+  border-radius: var(--flowbite-radius-xl);
+  box-shadow: var(--flowbite-shadow-sm);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: var(--flowbite-space-6);
+  border-bottom: 1px solid var(--flowbite-border-color);
+}
+
+.card-body {
+  padding: var(--flowbite-space-6);
+}
+
+.card-footer {
+  padding: var(--flowbite-space-6);
+  border-top: 1px solid var(--flowbite-border-color);
+  background-color: var(--flowbite-bg-secondary);
+}
+
+/* Form Components */
+.form-input {
+  width: 100%;
+  padding: var(--flowbite-space-2) var(--flowbite-space-3);
+  font-size: var(--flowbite-text-sm);
+  line-height: var(--flowbite-leading-normal);
+  color: var(--flowbite-text-primary);
+  background-color: var(--flowbite-bg-primary);
+  border: 1px solid var(--flowbite-border-color);
+  border-radius: var(--flowbite-radius-lg);
+  transition: var(--flowbite-transition-colors);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--flowbite-primary);
+  box-shadow: 0 0 0 3px var(--flowbite-primary-light);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--flowbite-space-2);
+  font-size: var(--flowbite-text-sm);
+  font-weight: var(--flowbite-font-medium);
+  color: var(--flowbite-text-primary);
+}
+
+/* Utility Classes */
+.text-primary {
+  color: var(--flowbite-primary);
+}
+
+.text-secondary {
+  color: var(--flowbite-text-secondary);
+}
+
+.text-muted {
+  color: var(--flowbite-text-muted);
+}
+
+.bg-primary {
+  background-color: var(--flowbite-primary);
+  color: var(--flowbite-text-inverse);
+}
+
+.bg-secondary {
+  background-color: var(--flowbite-bg-secondary);
+}
+
+.bg-tertiary {
+  background-color: var(--flowbite-bg-tertiary);
+}
+
+.shadow-sm {
+  box-shadow: var(--flowbite-shadow-sm);
+}
+
+.shadow-md {
+  box-shadow: var(--flowbite-shadow-md);
+}
+
+.shadow-lg {
+  box-shadow: var(--flowbite-shadow-lg);
+}
+
+.rounded-sm {
+  border-radius: var(--flowbite-radius-sm);
+}
+
+.rounded-md {
+  border-radius: var(--flowbite-radius-md);
+}
+
+.rounded-lg {
+  border-radius: var(--flowbite-radius-lg);
+}
+
+.rounded-xl {
+  border-radius: var(--flowbite-radius-xl);
+}
+
+.p-2 {
+  padding: var(--flowbite-space-2);
+}
+
+.p-4 {
+  padding: var(--flowbite-space-4);
+}
+
+.p-6 {
+  padding: var(--flowbite-space-6);
+}
+
+.m-2 {
+  margin: var(--flowbite-space-2);
+}
+
+.m-4 {
+  margin: var(--flowbite-space-4);
+}
+
+.m-6 {
+  margin: var(--flowbite-space-6);
+}
+
