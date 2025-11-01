@@ -1,0 +1,4 @@
+# Public directory
+# Files in this directory will be served as-is and not processed by Vite
+# Example: favicon.ico, robots.txt, etc.
+
