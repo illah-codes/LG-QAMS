@@ -10,7 +10,6 @@ let currentFilter = 'all';
 let currentPage = 1;
 const itemsPerPage = 10;
 let allAttendance = [];
-let currentUser = null;
 
 /**
  * Load attendance data for current staff user
@@ -23,8 +22,6 @@ async function loadAttendance() {
       console.error('Failed to get user:', error);
       return;
     }
-
-    currentUser = user;
 
     // Calculate date range based on filter
     let startDate = null;
@@ -139,7 +136,6 @@ export async function initStaffAttendancePage() {
         currentFilter = 'all';
         currentPage = 1;
         allAttendance = [];
-        currentUser = null;
 
         // Load attendance data
         await loadAttendance();

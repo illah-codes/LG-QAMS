@@ -78,7 +78,6 @@ function handleReportTypeChange() {
   const departmentContainer = document.getElementById('department-selection-container');
   const staffSelect = document.getElementById('report-staff');
   const departmentSelect = document.getElementById('report-department');
-  const staffLabel = staffContainer?.querySelector('label.form-label');
 
   if (type === 'monthly') {
     // Monthly report uses department selection (optional - can be "All Departments")
@@ -324,18 +323,18 @@ function renderReports(reports) {
     // Format date
     const createdDate = report.created_at
       ? new Date(report.created_at).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
       : 'Unknown date';
 
     // Format month
     const reportMonth = report.month
       ? new Date(report.month).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-        })
+        year: 'numeric',
+        month: 'long',
+      })
       : 'Unknown month';
 
     // Format report type
