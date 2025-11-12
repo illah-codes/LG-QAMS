@@ -57,44 +57,12 @@
         <div class="flex flex-wrap flex-gap-4">
           <a href="/staff/attendance" data-router class="btn btn-primary">View Full Attendance History</a>
           <a href="/staff/reports" data-router class="btn btn-outline">View Reports</a>
-          <a href="/scan" data-router class="btn btn-secondary">Scan QR Code</a>
         </div>
       </div>
     </div>
     <script type="module">
-      import { createAttendanceCard } from '/src/components/attendance-card/attendance-card.js';
-      import { getCurrentUser, getStaffAttendance, mockStats } from '/src/services/mock-data.js';
-      
-      // Set user name
-      const user = getCurrentUser();
-      document.getElementById('user-name').textContent = user.name;
-      
-      // Create stat cards
-      const statsContainer = document.getElementById('stats-cards');
-      const cards = [
-        createAttendanceCard({ title: 'Present Days', value: mockStats.presentDays, icon: '✅', color: 'success' }),
-        createAttendanceCard({ title: 'Absences', value: mockStats.absences, icon: '❌', color: 'danger' }),
-        createAttendanceCard({ title: 'Lateness', value: mockStats.lateness, icon: '⏰', color: 'warning' }),
-        createAttendanceCard({ title: 'Total Working Days', value: mockStats.totalWorkingDays, icon: '📅', color: 'info' }),
-      ];
-      cards.forEach(card => statsContainer.appendChild(card));
-      
-      // Populate recent attendance
-      const attendance = getStaffAttendance(user.id);
-      const tableBody = document.getElementById('recent-attendance-table');
-      attendance.slice(0, 5).forEach(record => {
-        const row = document.createElement('tr');
-        const statusBadge = record.isLate 
-          ? '<span class="badge badge-warning">Late</span>'
-          : '<span class="badge badge-success">Present</span>';
-        row.innerHTML = `
-          <td>${record.date}</td>
-          <td>${record.checkIn}</td>
-          <td>${record.checkOut}</td>
-          <td>${statusBadge}</td>
-        `;
-        tableBody.appendChild(row);
-      });
+      // Dashboard initialization is handled by route afterEnter hook
+      // This ensures data loads on initial load and when navigating back
     </script>
     <script type="module" src="/src/main.js"></script>
   </body>

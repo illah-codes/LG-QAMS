@@ -66,6 +66,8 @@ class Router {
    * @param {boolean} options.replace - Replace current history entry
    */
   async navigate(path, options = {}) {
+    // Store original path with query params before normalization
+    const originalPath = path;
     // Normalize path
     const normalizedPath = this._normalizePathInternal(path);
 
@@ -107,15 +109,18 @@ class Router {
       const previousRoute = this.currentRoute;
       this.currentRoute = actualRoute;
 
-      // Render page
-      await this.renderRoute(actualRoute, normalizedPath);
-
-      // Update browser URL
+      // Update browser URL BEFORE rendering so scripts can read query params
+      // Preserve query parameters and hash from original path
+      const fullPath =
+        originalPath.includes('?') || originalPath.includes('#') ? originalPath : normalizedPath;
       if (options.replace) {
-        window.history.replaceState({ path: normalizedPath }, '', normalizedPath);
+        window.history.replaceState({ path: normalizedPath }, '', fullPath);
       } else {
-        window.history.pushState({ path: normalizedPath }, '', normalizedPath);
+        window.history.pushState({ path: normalizedPath }, '', fullPath);
       }
+
+      // Render page (scripts will now see the updated URL with query params)
+      await this.renderRoute(actualRoute, normalizedPath);
 
       // Update document title
       document.title = actualRoute.title;

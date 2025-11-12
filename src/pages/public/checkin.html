@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Check In / Check Out - LG QAMS</title>
+    <link rel="stylesheet" href="/src/styles/flowbite-tokens.css" />
+    <link rel="stylesheet" href="/src/styles/variables.css" />
+    <link rel="stylesheet" href="/src/styles/flowbite.css" />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="page-container max-w-600" style="margin: 0 auto;">
+        <!-- Instructions Card -->
+        <div class="card shadow-sm card-spacing">
+          <div class="card-body p-6">
+            <h2 class="text-2xl mb-4 text-center">
+              Check In / Check Out
+            </h2>
+              <div class="info-box">
+              <p class="info-box-text">
+                📱 <strong>Instructions:</strong> Enter your email and password below. The system will automatically record your check-in or check-out based on your last record today.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Login Form -->
+        <div class="card shadow-lg">
+          <div class="card-body p-6">
+            <form id="scan-login-form" onsubmit="handleScanLogin(event)">
+              <div class="form-group-lg">
+                <label for="scan-email" class="form-label">Email</label>
+                <input
+                  type="email"
+                  id="scan-email"
+                  name="email"
+                  class="form-input"
+                  placeholder="Enter your email"
+                  required
+                  autofocus
+                />
+              </div>
+
+              <div class="form-group-lg">
+                <label for="scan-password" class="form-label">Password</label>
+                <div class="password-input-wrapper" style="position: relative;">
+                  <input
+                    type="password"
+                    id="scan-password"
+                    name="password"
+                    class="form-input"
+                    placeholder="Enter your password"
+                    required
+                    style="padding-right: calc(var(--flowbite-space-3) * 2 + 20px);"
+                  />
+                </div>
+              </div>
+
+              <div id="error-message" class="mb-4 error-message hidden"></div>
+
+              <button type="submit" class="btn btn-primary btn-full p-3 text-base">
+                Submit Attendance
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- QR Code Reference -->
+        <div class="card shadow-sm mt-6">
+          <div class="card-body p-6 text-center">
+            <p class="text-secondary text-sm mb-4">
+              Prefer to scan the QR code? <a href="/scan" data-router class="text-primary">View QR Code</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      import { initPasswordToggle } from '/src/utils/password-toggle.js';
+
+      // Initialize password toggle when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          const passwordInput = document.getElementById('scan-password');
+          if (passwordInput) {
+            initPasswordToggle(passwordInput);
+          }
+        });
+      } else {
+        // DOM already loaded
+        const passwordInput = document.getElementById('scan-password');
+        if (passwordInput) {
+          initPasswordToggle(passwordInput);
+        }
+      }
+
+      window.handleScanLogin = async function(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const email = formData.get('email');
+        const password = formData.get('password');
+
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.classList.add('hidden');
+        errorDiv.textContent = '';
+
+        try {
+          // Authenticate user
+          const { signIn } = await import('/src/services/auth.js');
+          const { user: authUser, error: authError } = await signIn(email, password);
+
+          if (authError || !authUser) {
+            errorDiv.classList.remove('hidden');
+            errorDiv.textContent = authError?.message || 'Invalid email or password';
+            return;
+          }
+
+          // Check if user is admin - admins do not need to check in/out
+          if (authUser.role === 'Admin') {
+            // Sign out the admin
+            try {
+              const { signOut } = await import('/src/services/auth.js');
+              await signOut();
+              // eslint-disable-next-line no-console
+              console.log('Admin signed out - admins do not need to check in/out');
+            } catch (signOutError) {
+              // eslint-disable-next-line no-console
+              console.error('Error signing out admin:', signOutError);
+            }
+            
+            // Redirect to login page instead of showing error
+            import('/src/utils/navigation.js').then(({ navigate }) => {
+              navigate('/login');
+            });
+            return;
+          }
+
+          // Ensure we're using the staff table's UUID id (staff.id), not auth.users.id
+          // authUser from signIn is the staffProfile object, so authUser.id is staff.id
+          const staffId = authUser.id;
+
+          // Check if already checked in today
+          const attendanceModule = await import('/src/services/attendance.js');
+          const { hasCheckedIn, data: todayRecord } = await attendanceModule.hasCheckedInToday(staffId);
+
+          // Debug: Log the check-in status
+          // eslint-disable-next-line no-console
+          console.log('Check-in status:', {
+            hasCheckedIn,
+            todayRecord,
+            hasCheckInTime: todayRecord?.check_in_time,
+            hasCheckOutTime: todayRecord?.check_out_time,
+            checkInTime: todayRecord?.check_in_time,
+            checkOutTime: todayRecord?.check_out_time
+          });
+
+          // Decision logic:
+          // - If checked in today AND has check_in_time AND no check-out time → Check Out
+          // - If checked in today AND has check-out time → Check In (new check-in after check-out)
+          // - If not checked in today → Check In
+          
+          // Check if user should check out (has record, has check_in_time, but no check_out_time)
+          const shouldCheckOut = hasCheckedIn && 
+                                 todayRecord && 
+                                 todayRecord.check_in_time && 
+                                 !todayRecord.check_out_time;
+
+          // eslint-disable-next-line no-console
+          console.log('Should check out?', shouldCheckOut, {
+            hasCheckedIn,
+            hasTodayRecord: !!todayRecord,
+            hasCheckInTime: !!todayRecord?.check_in_time,
+            noCheckOutTime: !todayRecord?.check_out_time
+          });
+
+          let action;
+          let result;
+
+          if (shouldCheckOut) {
+            // User is already checked in but not checked out → Check Out
+            action = 'Check-Out';
+            // eslint-disable-next-line no-console
+            console.log('Performing Check-Out');
+            result = await attendanceModule.recordCheckOut(staffId);
+            // eslint-disable-next-line no-console
+            console.log('Check-Out result:', result);
+          } else {
+            // User is not checked in, or already checked out → Check In
+            action = 'Check-In';
+            // eslint-disable-next-line no-console
+            console.log('Performing Check-In');
+            result = await attendanceModule.recordCheckIn(staffId);
+            // eslint-disable-next-line no-console
+            console.log('Check-In result:', result);
+          }
+
+          if (result.error) {
+            // eslint-disable-next-line no-console
+            console.error('Attendance error:', result.error);
+            
+            // Sign out user if check-in/out failed due to restrictions
+            // (office hours, already checked in/out, etc.)
+            const errorMessage = result.error.message || 'Failed to record attendance';
+            const isRestrictionError = 
+              errorMessage.includes('office hours') ||
+              errorMessage.includes('Already checked') ||
+              errorMessage.includes('already checked') ||
+              errorMessage.includes('Only one check-in') ||
+              errorMessage.includes('outside office hours') ||
+              errorMessage.includes('Admins do not need to check in/out');
+            
+            if (isRestrictionError) {
+              // Sign out the user since they cannot check in/out
+              try {
+                const { signOut } = await import('/src/services/auth.js');
+                await signOut();
+                // eslint-disable-next-line no-console
+                console.log('User signed out due to check-in/out restriction');
+              } catch (signOutError) {
+                // eslint-disable-next-line no-console
+                console.error('Error signing out:', signOutError);
+              }
+              
+              // Redirect to login page instead of showing error
+              import('/src/utils/navigation.js').then(({ navigate }) => {
+                navigate('/login');
+              });
+              return;
+            }
+            
+            errorDiv.classList.remove('hidden');
+            errorDiv.textContent = errorMessage;
+            return;
+          }
+
+          // eslint-disable-next-line no-console
+          console.log('Attendance recorded successfully:', { action, result });
+
+          // Format time - use check_out_time if action is Check-Out, otherwise use check_in_time
+          let time;
+          if (action === 'Check-Out' && result.data.check_out_time) {
+            time = new Date(result.data.check_out_time).toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+            });
+          } else if (result.data.check_in_time) {
+            time = new Date(result.data.check_in_time).toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+            });
+          } else {
+            time = new Date().toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+            });
+          }
+          
+          // eslint-disable-next-line no-console
+          console.log('Formatted time:', { action, time, checkInTime: result.data.check_in_time, checkOutTime: result.data.check_out_time });
+
+          // Get user information - ensure we have the correct fields
+          // Debug: Log the full authUser object to see its structure
+          // eslint-disable-next-line no-console
+          console.log('Full authUser object:', authUser);
+          // eslint-disable-next-line no-console
+          console.log('authUser keys:', Object.keys(authUser || {}));
+          
+          // Extract user information - signIn returns { ...staffProfile, authUser: authData.user }
+          // So all staff fields should be directly on authUser
+          const userName = authUser?.name || authUser?.email || 'User';
+          const userDepartment = authUser?.department || null;
+          const userStaffId = authUser?.staff_id || null;
+          
+          // eslint-disable-next-line no-console
+          console.log('Extracted user data:', {
+            userName,
+            userDepartment,
+            userStaffId,
+            hasDepartment: 'department' in (authUser || {}),
+            hasStaffId: 'staff_id' in (authUser || {}),
+            departmentValue: authUser?.department,
+            staffIdValue: authUser?.staff_id,
+            fullUser: authUser
+          });
+
+          // Redirect to success page
+          // Ensure all parameters are properly encoded
+          // Use 'N/A' as fallback if values are null/undefined
+          const displayDepartment = userDepartment || 'N/A';
+          const displayStaffId = userStaffId || 'N/A';
+          
+          const encodedAction = encodeURIComponent(action);
+          const encodedName = encodeURIComponent(userName);
+          const encodedTime = encodeURIComponent(time);
+          const encodedDepartment = encodeURIComponent(displayDepartment);
+          const encodedStaffId = encodeURIComponent(displayStaffId);
+          
+          // eslint-disable-next-line no-console
+          console.log('Redirecting with:', {
+            action,
+            name: userName,
+            time,
+            department: displayDepartment,
+            staffId: displayStaffId,
+            originalDepartment: userDepartment,
+            originalStaffId: userStaffId
+          });
+          // eslint-disable-next-line no-console
+          console.log('Encoded values:', { encodedAction, encodedName, encodedTime, encodedDepartment, encodedStaffId });
+          
+          // Build URL with query parameters
+          const successUrl = `/scan/success?name=${encodedName}&time=${encodedTime}&action=${encodedAction}&department=${encodedDepartment}&staffId=${encodedStaffId}`;
+          // eslint-disable-next-line no-console
+          console.log('Success URL (full):', successUrl);
+          // eslint-disable-next-line no-console
+          console.log('Success URL length:', successUrl.length);
+          
+          import('/src/utils/navigation.js').then(({ navigate }) => {
+            // eslint-disable-next-line no-console
+            console.log('About to navigate to:', successUrl);
+            navigate(successUrl);
+          });
+        } catch (error) {
+          errorDiv.classList.remove('hidden');
+          errorDiv.textContent = 'An error occurred. Please try again.';
+          // eslint-disable-next-line no-console
+          console.error('Scan login error:', error);
+        } 
+      };
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
+

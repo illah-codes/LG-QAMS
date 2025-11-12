@@ -32,10 +32,14 @@ export function createAttendanceCard({
 
   card.className = `card shadow-sm ${colorClasses[color] || colorClasses.primary}`;
 
-  const iconElement =
-    typeof icon === 'string' && icon.length === 1
-      ? `<span class="icon-large">${icon}</span>`
-      : `<i class="${icon}"></i>`;
+  // Check if icon is an emoji (not a CSS class)
+  // CSS classes are alphanumeric with hyphens/underscores and start with letter/underscore
+  // If it doesn't match CSS class pattern, treat it as an emoji
+  const isEmoji = typeof icon === 'string' && !/^[a-zA-Z_][a-zA-Z0-9_-]*$/.test(icon);
+
+  const iconElement = isEmoji
+    ? `<span class="icon-large">${icon}</span>`
+    : `<i class="${icon}"></i>`;
 
   const trendIcon = trend === 'up' ? '↑' : trend === 'down' ? '↓' : '';
 

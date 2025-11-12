@@ -29,8 +29,12 @@
                 <strong id="action-type">Check-In</strong> recorded for
               </p>
               <p class="text-xl font-bold text-primary mb-2">
-                <span id="staff-name">Olaitan</span>
+                <span id="staff-name"></span>
               </p>
+              <div class="text-base text-secondary mb-2">
+                <p><span class="font-medium">Staff ID:</span> <span id="staff-id">N/A</span></p>
+                <p><span class="font-medium">Department:</span> <span id="staff-department">N/A</span></p>
+              </div>
               <p class="text-base text-secondary">
                 at <span id="timestamp">08:12 AM</span>
               </p>
@@ -40,22 +44,99 @@
             <div class="flex-center flex-wrap flex-gap-4">
               <a href="/scan" data-router class="btn btn-primary">Scan Again</a>
               <a href="/staff/dashboard" data-router class="btn btn-outline">Go to Dashboard</a>
-              <a href="/" data-router class="btn btn-secondary">Back to Home</a>
             </div>
           </div>
         </div>
       </div>
     </div>
     <script type="module">
-      // Get data from URL parameters
-      const urlParams = new URLSearchParams(window.location.search);
-      const name = urlParams.get('name') || 'Olaitan';
-      const time = urlParams.get('time') || new Date().toLocaleTimeString();
-      const action = urlParams.get('action') || 'Check-In';
+      // Wait for URL to be ready - router updates URL before rendering, but scripts execute immediately
+      // So we need to wait a bit for the URL to be fully updated
+      function updateSuccessPage() {
+        // Get data from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const name = urlParams.get('name');
+        const time = urlParams.get('time');
+        const action = urlParams.get('action');
+        const department = urlParams.get('department');
+        const staffId = urlParams.get('staffId');
+        
+        // Debug: Log all values
+        // eslint-disable-next-line no-console
+        console.log('Success page - URL params:', {
+          name,
+          time,
+          action,
+          department,
+          staffId,
+          fullSearch: window.location.search,
+          fullURL: window.location.href,
+          pathname: window.location.pathname,
+          allParams: Array.from(urlParams.entries())
+        });
+        
+        // Only update if we have the required parameters, otherwise retry
+        if (!name || !time || !action) {
+          // eslint-disable-next-line no-console
+          console.log('Missing required URL parameters, will retry...');
+          return false;
+        }
+        
+        // Set values
+        const displayName = decodeURIComponent(name);
+        const displayTime = decodeURIComponent(time);
+        const displayAction = decodeURIComponent(action);
+        const displayDepartment = department ? decodeURIComponent(department) : 'N/A';
+        const displayStaffId = staffId ? decodeURIComponent(staffId) : 'N/A';
+        
+        const nameEl = document.getElementById('staff-name');
+        const timeEl = document.getElementById('timestamp');
+        const actionEl = document.getElementById('action-type');
+        const departmentEl = document.getElementById('staff-department');
+        const staffIdEl = document.getElementById('staff-id');
+        
+        if (nameEl) nameEl.textContent = displayName;
+        if (timeEl) timeEl.textContent = displayTime;
+        if (actionEl) actionEl.textContent = displayAction;
+        if (departmentEl) departmentEl.textContent = displayDepartment;
+        if (staffIdEl) staffIdEl.textContent = displayStaffId;
+        
+        // eslint-disable-next-line no-console
+        console.log('Success page - Display values set:', { displayName, displayTime, displayAction, displayDepartment, displayStaffId });
+        return true;
+      }
       
-      document.getElementById('staff-name').textContent = name;
-      document.getElementById('timestamp').textContent = time;
-      document.getElementById('action-type').textContent = action;
+      // Retry multiple times with increasing delays until we get the parameters
+      let retries = 0;
+      const maxRetries = 10;
+      
+      function tryUpdate() {
+        const success = updateSuccessPage();
+        if (!success && retries < maxRetries) {
+          retries++;
+          const delay = retries * 50; // 50ms, 100ms, 150ms, etc.
+          // eslint-disable-next-line no-console
+          console.log(`Retry ${retries}/${maxRetries} after ${delay}ms`);
+          setTimeout(tryUpdate, delay);
+        } else if (!success) {
+          // eslint-disable-next-line no-console
+          console.warn('Failed to get URL parameters after all retries, using defaults');
+          // Set defaults as fallback
+          const nameEl = document.getElementById('staff-name');
+          const timeEl = document.getElementById('timestamp');
+          const actionEl = document.getElementById('action-type');
+          const departmentEl = document.getElementById('staff-department');
+          const staffIdEl = document.getElementById('staff-id');
+          if (nameEl) nameEl.textContent = 'User';
+          if (timeEl) timeEl.textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          if (actionEl) actionEl.textContent = 'Check-In';
+          if (departmentEl) departmentEl.textContent = 'N/A';
+          if (staffIdEl) staffIdEl.textContent = 'N/A';
+        }
+      }
+      
+      // Start trying immediately
+      tryUpdate();
     </script>
     <script type="module" src="/src/main.js"></script>
   </body>

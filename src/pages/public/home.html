@@ -13,28 +13,13 @@
     <div id="app">
       <!-- Hero Section -->
       <section class="container hero">
-        <div class="text-center max-w-800">
+        <div class="text-center max-w-800" style="margin: 0 auto;">
           <h1 class="hero-title">
             Local Government QR Code Attendance Management System
           </h1>
           <p class="hero-subtitle">
             Streamline your attendance tracking with our digital QR code system. Quick, accurate, and secure.
           </p>
-        </div>
-
-        <!-- QR Code Section -->
-        <div class="card shadow-lg max-w-500 mb-8">
-          <div class="card-body p-6 text-center">
-            <h2 class="text-2xl mb-4">Scan QR Code to Check In/Out</h2>
-            <div id="qr-code-display" class="qr-code-container mt-4"></div>
-            <div class="qr-code-actions">
-              <button class="btn btn-primary" onclick="downloadQR()">Download QR Code</button>
-              <button class="btn btn-secondary" onclick="printQR()">Print QR Code</button>
-            </div>
-            <p class="qr-code-instructions">
-              Staff members can scan this QR code with their mobile devices to check in or check out.
-            </p>
-          </div>
         </div>
 
         <!-- Info Cards -->
@@ -70,39 +55,12 @@
 
         <!-- Call to Action -->
         <div class="text-center">
-          <a href="/scan" data-router class="btn btn-primary btn-lg flex-gap-4">Go to Scan Page</a>
+          <a href="/scan" data-router class="btn btn-primary btn-lg flex-gap-4">View QR Code</a>
+          <a href="/checkin" data-router class="btn btn-outline btn-lg">Check In/Out</a>
           <a href="/login" data-router class="btn btn-outline btn-lg">Staff Login</a>
         </div>
       </section>
     </div>
-    <script type="module">
-      import { generateQRCode } from '/src/components/qr-code/qr-code.js';
-      
-      window.downloadQR = function() {
-        const canvas = document.querySelector('#qr-code-display canvas');
-        if (canvas) {
-          import('/src/components/qr-code/qr-code.js').then(({ downloadQRCode }) => {
-            downloadQRCode(canvas, 'lg-qams-qrcode.png');
-          });
-        }
-      };
-      
-      window.printQR = function() {
-        const canvas = document.querySelector('#qr-code-display canvas');
-        if (canvas) {
-          import('/src/components/qr-code/qr-code.js').then(({ printQRCode }) => {
-            printQRCode(canvas);
-          });
-        }
-      };
-      
-      // Generate QR code on page load
-      const qrContainer = document.getElementById('qr-code-display');
-      if (qrContainer) {
-        const currentUrl = window.location.origin + '/scan';
-        generateQRCode(qrContainer, currentUrl, { size: 256 });
-      }
-    </script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

@@ -37,13 +37,18 @@
                 <label class="form-label">Month</label>
                 <input type="month" id="report-month" class="form-input" required />
               </div>
-              <div>
+              <div id="staff-selection-container" class="hidden">
+                <label class="form-label">Staff Member</label>
+                <select id="report-staff" class="form-input">
+                  <option value="">Select Staff Member</option>
+                  <!-- Staff will be populated dynamically -->
+                </select>
+              </div>
+              <div id="department-selection-container">
                 <label class="form-label">Department</label>
                 <select id="report-department" class="form-input">
                   <option value="">All Departments</option>
-                  <option value="Administration">Administration</option>
-                  <option value="Finance">Finance</option>
-                  <option value="IT">IT</option>
+                  <!-- Departments will be populated dynamically -->
                 </select>
               </div>
               <button type="submit" class="btn btn-primary">Generate Report</button>
@@ -56,17 +61,118 @@
           <h2 class="section-title mb-4">Generated Reports</h2>
           <!-- Reports will be listed here -->
         </div>
+        <!-- Pagination -->
+        <div id="pagination-container" class="flex-center flex-gap-2 mt-6">
+          <!-- Pagination controls will be populated by JavaScript -->
+        </div>
       </div>
     </div>
-    <script type="module">
-      window.generateReport = function(event) {
-        event.preventDefault();
-        const type = document.getElementById('report-type').value;
-        const month = document.getElementById('report-month').value;
-        const department = document.getElementById('report-department').value;
-        
-        alert(`Generating ${type} report for ${month}${department ? ' - ' + department : ''}... (Feature coming soon)`);
-      };
+    <script>
+      // Use non-module script to ensure functions are globally accessible
+      (async function() {
+        const { generateMonthlyReport, generateDepartmentalReport, saveReport } = await import('/src/services/reports.js');
+        const { initAdminReports, initReportsPageForm } = await import('/src/utils/reports-init.js');
+
+        // Initialize form and reports
+        async function initializePage() {
+          await initReportsPageForm();
+          await initAdminReports();
+        }
+
+        window.generateReport = async function(event) {
+          event.preventDefault();
+          const type = document.getElementById('report-type').value;
+          const month = document.getElementById('report-month').value;
+          const department = document.getElementById('report-department').value;
+          const staffId = document.getElementById('report-staff').value;
+
+          try {
+            let data, error;
+            let reportStaffId = null;
+
+            if (type === 'monthly') {
+              // Monthly report uses department (can be "All Departments" if empty)
+              // For monthly report, use departmental report generation
+              const result = await generateDepartmentalReport(department || null, month);
+              data = result.data;
+              error = result.error;
+            } else if (type === 'individual') {
+              // Individual report uses department (can be "All Departments" if empty)
+              // For individual report, use departmental report generation
+              const result = await generateDepartmentalReport(department || null, month);
+              data = result.data;
+              error = result.error;
+            } else if (type === 'departmental') {
+              // Departmental report can use "All Departments" if empty
+              const result = await generateDepartmentalReport(department || null, month);
+              data = result.data;
+              error = result.error;
+            } else {
+              alert('Report type not supported');
+              return;
+            }
+
+            if (error) {
+              alert('Failed to generate report: ' + error.message);
+              return;
+            }
+
+            // Save report
+            const saveResult = await saveReport({
+              staff_id: reportStaffId || null,
+              report_type: type,
+              month: month + '-01',
+              department: department || null,
+            });
+
+            if (saveResult.error) {
+              alert('Report generated but failed to save: ' + saveResult.error.message);
+            }
+
+            // Refresh reports list (reset to page 1)
+            await initAdminReports(1);
+
+            // Build success message
+            let successMessage = `Report generated successfully for ${month}`;
+            if (type === 'monthly') {
+              if (department) {
+                successMessage += ` - ${department}`;
+              } else {
+                successMessage += ` - All Departments`;
+              }
+            } else if (type === 'individual') {
+              // Individual report now uses department (changed from staff)
+              if (department) {
+                successMessage += ` - ${department}`;
+              } else {
+                successMessage += ` - All Departments`;
+              }
+            } else if (type === 'departmental') {
+              if (department) {
+                successMessage += ` - ${department}`;
+              } else {
+                successMessage += ` - All Departments`;
+              }
+            }
+            successMessage += '!';
+
+            alert(successMessage);
+          } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('Error generating report:', error);
+            alert('Failed to generate report');
+          }
+        };
+
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => {
+            initializePage();
+          });
+        } else {
+          initializePage();
+        }
+      })();
     </script>
     <script type="module" src="/src/main.js"></script>
   </body>

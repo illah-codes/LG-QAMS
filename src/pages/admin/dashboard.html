@@ -37,6 +37,7 @@
                     <th>Staff Name</th>
                     <th>Department</th>
                     <th>Check In</th>
+                    <th>Check Out</th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -44,6 +45,10 @@
                   <!-- Table rows will be populated by JavaScript -->
                 </tbody>
               </table>
+            </div>
+            <!-- Pagination -->
+            <div id="pagination-container" class="flex-center flex-gap-2 mt-6">
+              <!-- Pagination controls will be populated by JavaScript -->
             </div>
           </div>
         </div>
@@ -56,46 +61,6 @@
         </div>
       </div>
     </div>
-    <script type="module">
-      import { createAttendanceCard } from '/src/components/attendance-card/attendance-card.js';
-      import { getTodayAttendance } from '/src/services/mock-data.js';
-      
-      const today = getTodayAttendance();
-      
-      // Set today's date
-      document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
-      
-      // Create stat cards
-      const statsContainer = document.getElementById('today-stats');
-      const cards = [
-        createAttendanceCard({ title: 'Present Today', value: today.present, icon: '✅', color: 'success' }),
-        createAttendanceCard({ title: 'Absent Today', value: today.absent, icon: '❌', color: 'danger' }),
-        createAttendanceCard({ title: 'Late Today', value: today.late, icon: '⏰', color: 'warning' }),
-        createAttendanceCard({ title: 'Total Staff', value: today.total, icon: '👥', color: 'info' }),
-      ];
-      cards.forEach(card => statsContainer.appendChild(card));
-      
-      // Populate today's attendance table
-      const tableBody = document.getElementById('today-attendance-table');
-      today.staff.forEach(staff => {
-        const row = document.createElement('tr');
-        const statusBadge = staff.status === 'Present'
-          ? '<span class="badge badge-success">Present</span>'
-          : '';
-        row.innerHTML = `
-          <td>${staff.name}</td>
-          <td>Administration</td>
-          <td>${staff.checkIn}</td>
-          <td>${statusBadge}</td>
-        `;
-        tableBody.appendChild(row);
-      });
-    </script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

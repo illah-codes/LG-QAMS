@@ -8,13 +8,16 @@
     "build": "vite build",
     "preview": "vite preview --host",
     "lint": "eslint .",
-    "format": "prettier --write \"**/*.{js,html,css,json,md}\""
+    "format": "prettier --write \"**/*.{js,html,css,json,md}\"",
+    "migrate": "node scripts/run-migrations.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.78.0",
     "flowbite": "^3.1.2",
+    "jspdf": "^2.5.1",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {

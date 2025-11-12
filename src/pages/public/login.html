@@ -25,13 +25,13 @@
 
             <form id="login-form" onsubmit="handleLogin(event)">
               <div class="form-group">
-                <label for="login-staff-id" class="form-label">Staff ID</label>
+                <label for="login-email" class="form-label">Email</label>
                 <input
-                  type="text"
-                  id="login-staff-id"
-                  name="staffId"
+                  type="email"
+                  id="login-email"
+                  name="email"
                   class="form-input"
-                  placeholder="Enter your Staff ID"
+                  placeholder="Enter your email"
                   required
                   autofocus
                 />
@@ -39,14 +39,17 @@
 
               <div class="form-group">
                 <label for="login-password" class="form-label">Password</label>
-                <input
-                  type="password"
-                  id="login-password"
-                  name="password"
-                  class="form-input"
-                  placeholder="Enter your password"
-                  required
-                />
+                <div class="password-input-wrapper" style="position: relative;">
+                  <input
+                    type="password"
+                    id="login-password"
+                    name="password"
+                    class="form-input"
+                    placeholder="Enter your password"
+                    required
+                    style="padding-right: calc(var(--flowbite-space-3) * 2 + 20px);"
+                  />
+                </div>
               </div>
 
               <div class="flex-center mb-6">
@@ -73,30 +76,58 @@
       </div>
     </div>
     <script type="module">
-      window.handleLogin = function(event) {
+      import { initPasswordToggle } from '/src/utils/password-toggle.js';
+
+      // Initialize password toggle when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          const passwordInput = document.getElementById('login-password');
+          if (passwordInput) {
+            initPasswordToggle(passwordInput);
+          }
+        });
+      } else {
+        // DOM already loaded
+        const passwordInput = document.getElementById('login-password');
+        if (passwordInput) {
+          initPasswordToggle(passwordInput);
+        }
+      }
+
+      window.handleLogin = async function(event) {
         event.preventDefault();
         const formData = new FormData(event.target);
-        const staffId = formData.get('staffId');
+        const email = formData.get('email');
         const password = formData.get('password');
-        
-        // Mock authentication
-        // In real app, this would verify credentials
-        import('/src/services/mock-data.js').then((mockData) => {
-          const user = mockData.mockStaff.find(s => s.id === staffId && s.password === password);
+
+        const errorDiv = document.getElementById('login-error');
+        errorDiv.classList.add('hidden');
+        errorDiv.textContent = '';
+
+        try {
+          const { signIn } = await import('/src/services/auth.js');
+          const { user, error } = await signIn(email, password);
+
+          if (error) {
+            errorDiv.classList.remove('hidden');
+            errorDiv.textContent = error.message || 'Invalid email or password';
+            return;
+          }
+
           if (user) {
-            // Store session (mock)
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            
             // Redirect based on role
             const redirectPath = user.role === 'Admin' ? '/admin/dashboard' : '/staff/dashboard';
             import('/src/utils/navigation.js').then(({ navigate }) => {
-              navigate(redirectPath);
+              const urlParams = new URLSearchParams(window.location.search);
+              const redirect = urlParams.get('redirect');
+              navigate(redirect || redirectPath);
             });
-          } else {
-            document.getElementById('login-error').classList.remove('hidden');
-            document.getElementById('login-error').textContent = 'Invalid Staff ID or password';
           }
-        });
+        } catch (error) {
+          errorDiv.classList.remove('hidden');
+          errorDiv.textContent = 'An error occurred. Please try again.';
+          console.error('Login error:', error);
+        }
       };
     </script>
     <script type="module" src="/src/main.js"></script>

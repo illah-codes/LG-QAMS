@@ -58,76 +58,12 @@
       </div>
     </div>
     <script type="module">
-      import { getCurrentUser, getStaffAttendance } from '/src/services/mock-data.js';
-      
-      let currentFilter = 'all';
-      let currentPage = 1;
-      const itemsPerPage = 10;
-      
-      const user = getCurrentUser();
-      let allAttendance = getStaffAttendance(user.id);
-      
-      function renderTable() {
-        const tbody = document.getElementById('attendance-table-body');
-        tbody.innerHTML = '';
-        
-        const filtered = filterAttendanceData(allAttendance, currentFilter);
-        const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-        
-        paginated.forEach(record => {
-          const row = document.createElement('tr');
-          const statusBadge = record.isLate 
-            ? '<span class="badge badge-warning">Late</span>'
-            : '<span class="badge badge-success">Present</span>';
-          row.innerHTML = `
-            <td>${record.date}</td>
-            <td>${record.checkIn}</td>
-            <td>${record.checkOut}</td>
-            <td>${statusBadge}</td>
-          `;
-          tbody.appendChild(row);
-        });
-        
-        const totalPages = Math.ceil(filtered.length / itemsPerPage);
-        document.getElementById('current-page').textContent = currentPage;
-        document.getElementById('total-pages').textContent = totalPages || 1;
-      }
-      
-      function filterAttendanceData(data, filter) {
-        if (filter === 'all') return data;
-        // Add more filtering logic here
-        return data;
-      }
-      
-      window.filterAttendance = function(filter) {
-        currentFilter = filter;
-        currentPage = 1;
-        renderTable();
-        
-        // Update button states
-        document.querySelectorAll('.btn-outline, .btn-primary').forEach(btn => {
-          btn.className = 'btn btn-outline';
-        });
-        event.target.className = 'btn btn-primary';
-      };
-      
-      window.previousPage = function() {
-        if (currentPage > 1) {
-          currentPage--;
-          renderTable();
-        }
-      };
-      
-      window.nextPage = function() {
-        const filtered = filterAttendanceData(allAttendance, currentFilter);
-        const totalPages = Math.ceil(filtered.length / itemsPerPage);
-        if (currentPage < totalPages) {
-          currentPage++;
-          renderTable();
-        }
-      };
-      
-      renderTable();
+      // Import utility functions and make them available globally for onclick handlers
+      // The utility file exports functions to window, so they're available for inline handlers
+      import '/src/utils/staff-attendance-init.js';
+
+      // Attendance loading is now handled by afterEnter hook in routes.js
+      // Filter and pagination functions are exported to window by staff-attendance-init.js
     </script>
     <script type="module" src="/src/main.js"></script>
   </body>

@@ -53,6 +53,10 @@
                 </tbody>
               </table>
             </div>
+            <!-- Pagination -->
+            <div id="pagination-container" class="flex-center flex-gap-2 mt-6">
+              <!-- Pagination controls will be populated by JavaScript -->
+            </div>
           </div>
         </div>
       </div>
@@ -69,7 +73,7 @@
               <div class="grid-2-col">
                 <div>
                   <label class="form-label">Staff ID</label>
-                  <input type="text" id="new-staff-id" class="form-input" required />
+                  <input type="text" id="new-staff-id" class="form-input" readonly disabled placeholder="Auto-generated" />
                 </div>
                 <div>
                   <label class="form-label">Full Name</label>
@@ -99,47 +103,140 @@
           </div>
         </div>
       </div>
+
+      <!-- Edit Staff Modal -->
+      <div id="edit-staff-modal" class="modal-overlay hidden">
+        <div class="card shadow-lg max-w-500 w-full modal-content">
+          <div class="card-header p-6 flex-between">
+            <h2 class="section-title">Edit Staff</h2>
+            <button onclick="closeEditStaffModal()" class="btn-close text-secondary">&times;</button>
+          </div>
+          <div class="card-body p-6">
+            <form onsubmit="updateStaffForm(event)">
+              <input type="hidden" id="edit-staff-id" />
+              <div class="grid-2-col">
+                <div>
+                  <label class="form-label">Staff ID</label>
+                  <input type="text" id="edit-staff-staff-id" class="form-input" readonly disabled />
+                </div>
+                <div>
+                  <label class="form-label">Full Name</label>
+                  <input type="text" id="edit-staff-name" class="form-input" required />
+                </div>
+                <div>
+                  <label class="form-label">Email</label>
+                  <input type="email" id="edit-staff-email" class="form-input" required />
+                </div>
+                <div>
+                  <label class="form-label">Department</label>
+                  <input type="text" id="edit-staff-department" class="form-input" required />
+                </div>
+                <div>
+                  <label class="form-label">Role</label>
+                  <select id="edit-staff-role" class="form-input" required>
+                    <option value="Staff">Staff</option>
+                    <option value="Admin">Admin</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex flex-gap-4 mt-6">
+                <button type="submit" class="btn btn-primary">Update Staff</button>
+                <button type="button" class="btn btn-outline" onclick="closeEditStaffModal()">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirmation Modal -->
+      <div id="confirmation-modal" class="modal-overlay hidden">
+        <div class="card shadow-lg max-w-300 w-full modal-content">
+          <div class="card-body p-4">
+            <p id="confirmation-message" class="text-sm mb-4"></p>
+            <div class="flex flex-gap-2 justify-end">
+              <button id="confirmation-yes" class="btn btn-primary">Yes</button>
+              <button id="confirmation-no" class="btn btn-outline">No</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <script type="module">
-      import { getAllStaff } from '/src/services/mock-data.js';
-      
-      let allStaff = getAllStaff();
-      
-      function renderStaffTable(staffList = allStaff) {
-        const tbody = document.getElementById('staff-table-body');
-        tbody.innerHTML = '';
-        
-        staffList.forEach(staff => {
-          const row = document.createElement('tr');
-          const statusBadge = staff.status === 'active'
-            ? '<span class="badge badge-success">Active</span>'
-            : '<span class="badge badge-secondary">Inactive</span>';
-          row.innerHTML = `
-            <td>${staff.id}</td>
-            <td>${staff.name}</td>
-            <td>${staff.email}</td>
-            <td>${staff.department}</td>
-            <td>${staff.role}</td>
-            <td>${statusBadge}</td>
-            <td>
-              <div class="flex flex-gap-2">
-                <button class="btn btn-sm btn-outline" onclick="editStaff('${staff.id}')">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="deactivateStaff('${staff.id}')">Deactivate</button>
-              </div>
-            </td>
-          `;
-          tbody.appendChild(row);
+      import { getAllStaff, createStaff, updateStaff, deactivateStaff, activateStaff, searchStaff, getStaffById } from '/src/services/staff.js';
+      import { initStaffManagementPage } from '/src/utils/staff-init.js';
+
+      // Initialize allStaff as empty array, will be populated by initStaffManagementPage
+      window.allStaff = window.allStaff || [];
+
+      // Custom confirmation function with Yes/No buttons
+      window.showConfirmation = function(message) {
+        return new Promise((resolve) => {
+          const modal = document.getElementById('confirmation-modal');
+          const messageEl = document.getElementById('confirmation-message');
+          const yesBtn = document.getElementById('confirmation-yes');
+          const noBtn = document.getElementById('confirmation-no');
+
+          if (!modal || !messageEl || !yesBtn || !noBtn) {
+            // Fallback to native confirm if modal elements not found
+            resolve(confirm(message));
+            return;
+          }
+
+          // Set message
+          messageEl.textContent = message;
+
+          // Remove existing event listeners by cloning buttons
+          const newYesBtn = yesBtn.cloneNode(true);
+          const newNoBtn = noBtn.cloneNode(true);
+          yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+          noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+
+          // Show modal
+          modal.classList.remove('hidden');
+
+          // Handle Yes button
+          newYesBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            resolve(true);
+          });
+
+          // Handle No button
+          newNoBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            resolve(false);
+          });
         });
-      }
+      };
       
-      window.filterStaff = function() {
-        const search = document.getElementById('staff-search').value.toLowerCase();
-        const filtered = allStaff.filter(staff => 
-          staff.name.toLowerCase().includes(search) ||
-          staff.id.toLowerCase().includes(search) ||
-          staff.department.toLowerCase().includes(search)
-        );
-        renderStaffTable(filtered);
+      window.filterStaff = async function() {
+        const search = document.getElementById('staff-search').value;
+        
+        if (!search || search.trim() === '') {
+          // Reset to page 1 when clearing search
+          await initStaffManagementPage(1);
+          return;
+        }
+
+        try {
+          const { data, error } = await searchStaff(search);
+          if (error) {
+            // eslint-disable-next-line no-console
+            console.error('Search error:', error);
+            return;
+          }
+          // For search results, render directly (no pagination for search)
+          if (window.renderStaffTable) {
+            window.renderStaffTable(data || []);
+            // Hide pagination for search results
+            const paginationContainer = document.getElementById('pagination-container');
+            if (paginationContainer) {
+              paginationContainer.innerHTML = '';
+            }
+          }
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error searching staff:', error);
+        }
       };
       
       window.openAddStaffModal = function() {
@@ -149,25 +246,226 @@
       window.closeAddStaffModal = function() {
         document.getElementById('add-staff-modal').classList.add('hidden');
         document.querySelector('#add-staff-modal form').reset();
+        // Clear the auto-generated staff_id display
+        document.getElementById('new-staff-id').value = '';
       };
       
-      window.addStaff = function(event) {
+      window.addStaff = async function(event) {
         event.preventDefault();
-        alert('Staff added successfully! (Feature coming soon)');
-        closeAddStaffModal();
-      };
-      
-      window.editStaff = function(staffId) {
-        alert(`Edit staff ${staffId} (Feature coming soon)`);
-      };
-      
-      window.deactivateStaff = function(staffId) {
-        if (confirm('Are you sure you want to deactivate this staff member?')) {
-          alert(`Staff ${staffId} deactivated (Feature coming soon)`);
+        
+        const name = document.getElementById('new-staff-name').value;
+        const email = document.getElementById('new-staff-email').value;
+        const department = document.getElementById('new-staff-department').value;
+        const role = document.getElementById('new-staff-role').value;
+        const password = 'defaultPassword123'; // In production, generate or require password
+
+        // Show loading state
+        const submitButton = event.target.querySelector('button[type="submit"]');
+        const originalText = submitButton.textContent;
+        submitButton.disabled = true;
+        submitButton.textContent = 'Adding...';
+
+        try {
+          // staff_id will be auto-generated by database trigger
+          const { data, error } = await createStaff(
+            { name, email, department, role },
+            password
+          );
+
+          if (error) {
+            // eslint-disable-next-line no-console
+            console.error('Create staff error:', error);
+            alert('Failed to add staff: ' + (error.message || 'Unknown error'));
+            submitButton.disabled = false;
+            submitButton.textContent = originalText;
+            return;
+          }
+          
+          // Display generated staff_id
+          if (data && data.staff_id) {
+            document.getElementById('new-staff-id').value = data.staff_id;
+          }
+
+          // Show success message with generated staff_id
+          const successMessage = data && data.staff_id 
+            ? `Staff added successfully!\n\nStaff ID: ${data.staff_id}\nDefault password: ${password}\n\nNote: If email confirmation is enabled, the user will need to confirm their email before logging in.`
+            : `Staff added successfully!\n\nDefault password: ${password}\n\nNote: If email confirmation is enabled, the user will need to confirm their email before logging in.`;
+          alert(successMessage);
+          closeAddStaffModal();
+          // Reload staff list
+          await initStaffManagementPage();
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error adding staff:', error);
+          alert('Failed to add staff: ' + (error.message || 'Unknown error'));
+        } finally {
+          submitButton.disabled = false;
+          submitButton.textContent = originalText;
         }
       };
-      
-      renderStaffTable();
+
+      window.openEditStaffModal = function() {
+        document.getElementById('edit-staff-modal').classList.remove('hidden');
+      };
+
+      window.closeEditStaffModal = function() {
+        document.getElementById('edit-staff-modal').classList.add('hidden');
+        document.querySelector('#edit-staff-modal form').reset();
+      };
+
+      window.editStaff = async function(staffId) {
+        try {
+          // Load staff data
+          const { data: staff, error } = await getStaffById(staffId);
+          
+          if (error || !staff) {
+            alert('Failed to load staff data: ' + (error?.message || 'Staff not found'));
+            return;
+          }
+
+          // Populate edit form
+          document.getElementById('edit-staff-id').value = staff.id;
+          document.getElementById('edit-staff-staff-id').value = staff.staff_id || '';
+          document.getElementById('edit-staff-name').value = staff.name || '';
+          document.getElementById('edit-staff-email').value = staff.email || '';
+          document.getElementById('edit-staff-department').value = staff.department || '';
+          document.getElementById('edit-staff-role').value = staff.role || 'Staff';
+
+          // Open modal
+          openEditStaffModal();
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error loading staff for edit:', error);
+          alert('Failed to load staff data');
+        }
+      };
+
+      window.updateStaffForm = async function(event) {
+        event.preventDefault();
+        
+        const staffId = document.getElementById('edit-staff-id').value;
+        const name = document.getElementById('edit-staff-name').value;
+        const email = document.getElementById('edit-staff-email').value;
+        const department = document.getElementById('edit-staff-department').value;
+        const role = document.getElementById('edit-staff-role').value;
+
+        // Show loading state
+        const submitButton = event.target.querySelector('button[type="submit"]');
+        const originalText = submitButton.textContent;
+        submitButton.disabled = true;
+        submitButton.textContent = 'Updating...';
+
+        try {
+          const { data, error } = await updateStaff(staffId, {
+            name,
+            email,
+            department,
+            role,
+          });
+
+          if (error) {
+            // eslint-disable-next-line no-console
+            console.error('Update staff error:', error);
+            alert('Failed to update staff: ' + (error.message || 'Unknown error'));
+            submitButton.disabled = false;
+            submitButton.textContent = originalText;
+            return;
+          }
+
+          alert('Staff updated successfully!');
+          closeEditStaffModal();
+          // Reload staff list
+          await initStaffManagementPage();
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error updating staff:', error);
+          alert('Failed to update staff: ' + (error.message || 'Unknown error'));
+        } finally {
+          submitButton.disabled = false;
+          submitButton.textContent = originalText;
+        }
+      };
+
+      window.deactivateStaffById = async function(staffId) {
+        const confirmed = await window.showConfirmation('Are you sure you want to deactivate this staff member?');
+        if (!confirmed) {
+          return;
+        }
+
+        try {
+          // eslint-disable-next-line no-console
+          console.log('Deactivating staff:', staffId);
+          const { data, error } = await deactivateStaff(staffId);
+          
+          if (error) {
+            // eslint-disable-next-line no-console
+            console.error('Deactivate staff error:', error);
+            alert('Failed to deactivate staff: ' + error.message);
+            return;
+          }
+
+          // eslint-disable-next-line no-console
+          console.log('Deactivate staff result:', data);
+          
+          if (data && data.status === 'inactive') {
+            alert('Staff deactivated successfully');
+            // Reload staff list
+            await initStaffManagementPage();
+          } else {
+            // eslint-disable-next-line no-console
+            console.warn('Staff deactivation may not have updated status. Response:', data);
+            alert('Staff deactivation completed. Refreshing list...');
+            // Reload staff list anyway
+            await initStaffManagementPage();
+          }
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error deactivating staff:', error);
+          alert('Failed to deactivate staff: ' + (error.message || 'Unknown error'));
+        }
+      };
+
+      window.reactivateStaffById = async function(staffId) {
+        const confirmed = await window.showConfirmation('Are you sure you want to reactivate this staff member?');
+        if (!confirmed) {
+          return;
+        }
+
+        try {
+          // eslint-disable-next-line no-console
+          console.log('Reactivating staff:', staffId);
+          const { data, error } = await activateStaff(staffId);
+          
+          if (error) {
+            // eslint-disable-next-line no-console
+            console.error('Reactivate staff error:', error);
+            alert('Failed to reactivate staff: ' + error.message);
+            return;
+          }
+
+          // eslint-disable-next-line no-console
+          console.log('Reactivate staff result:', data);
+          
+          if (data && data.status === 'active') {
+            alert('Staff reactivated successfully');
+            // Reload staff list
+            await initStaffManagementPage();
+          } else {
+            // eslint-disable-next-line no-console
+            console.warn('Staff reactivation may not have updated status. Response:', data);
+            alert('Staff reactivation completed. Refreshing list...');
+            // Reload staff list anyway
+            await initStaffManagementPage();
+          }
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error reactivating staff:', error);
+          alert('Failed to reactivate staff: ' + (error.message || 'Unknown error'));
+        }
+      };
+
+      // Staff initialization is now handled by afterEnter hook in routes.js
+      // No need to call loadStaff() here - it will be called when route is entered
     </script>
     <script type="module" src="/src/main.js"></script>
   </body>

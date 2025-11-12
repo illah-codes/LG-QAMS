@@ -77,7 +77,7 @@
           </div>
           <div class="card-body p-6">
             <div class="grid-2-col">
-              <button class="btn btn-primary" onclick="backupData()">Backup Data</button>
+              <button class="btn btn-primary" id="backup-data-btn" onclick="backupData(event)">Backup Data</button>
               <button class="btn btn-outline" onclick="restoreData()">Restore Data</button>
             </div>
           </div>
@@ -85,28 +85,209 @@
       </div>
     </div>
     <script type="module">
-      window.saveOfficeHours = function(event) {
+      import { getAllSettings, updateSettings, getOfficeHours } from '/src/services/settings.js';
+
+      async function loadSettings() {
+        try {
+          const { data: officeHours } = await getOfficeHours();
+          if (officeHours) {
+            document.getElementById('office-start').value = officeHours.start;
+            document.getElementById('office-end').value = officeHours.end;
+            document.getElementById('late-threshold').value = officeHours.lateThreshold;
+          }
+
+          const { data: allSettings } = await getAllSettings();
+          if (allSettings) {
+            document.getElementById('ip-restriction').checked = allSettings.ip_restriction === 'true';
+            document.getElementById('auto-reports').checked = allSettings.auto_generate_reports === 'true';
+          }
+        } catch (error) {
+          console.error('Error loading settings:', error);
+        }
+      }
+
+      window.saveOfficeHours = async function(event) {
         event.preventDefault();
-        alert('Office hours saved successfully! (Feature coming soon)');
+        
+        try {
+          const { error } = await updateSettings({
+            office_start_time: document.getElementById('office-start').value,
+            office_end_time: document.getElementById('office-end').value,
+            late_threshold_minutes: parseInt(document.getElementById('late-threshold').value),
+          });
+
+          if (error) {
+            alert('Failed to save office hours: ' + error.message);
+            return;
+          }
+
+          alert('Office hours saved successfully!');
+        } catch (error) {
+          console.error('Error saving office hours:', error);
+          alert('Failed to save office hours');
+        }
       };
-      
-      window.saveConfiguration = function() {
-        alert('Configuration saved successfully! (Feature coming soon)');
+
+      window.saveConfiguration = async function() {
+        try {
+          const { error } = await updateSettings({
+            ip_restriction: document.getElementById('ip-restriction').checked.toString(),
+            auto_generate_reports: document.getElementById('auto-reports').checked.toString(),
+          });
+
+          if (error) {
+            alert('Failed to save configuration: ' + error.message);
+            return;
+          }
+
+          alert('Configuration saved successfully!');
+        } catch (error) {
+          console.error('Error saving configuration:', error);
+          alert('Failed to save configuration');
+        }
       };
-      
-      window.backupData = function() {
-        alert('Backing up data... (Feature coming soon)');
+
+      window.backupData = async function(event) {
+        try {
+          // Show loading state
+          const button = event?.target || document.getElementById('backup-data-btn');
+          const originalText = button?.textContent || 'Backup Data';
+          if (button) {
+            button.disabled = true;
+            button.textContent = 'Backing up...';
+          }
+
+          // Import backup service
+          const { exportData, downloadBackup } = await import('/src/services/backup.js');
+
+          // Export data
+          const { data: jsonData, error } = await exportData();
+
+          if (error) {
+            alert('Failed to backup data: ' + error.message);
+            if (button) {
+              button.disabled = false;
+              button.textContent = originalText;
+            }
+            return;
+          }
+
+          // Download backup file
+          downloadBackup(jsonData);
+
+          // Show success message
+          alert('Backup completed successfully! The file has been downloaded.');
+
+          // Restore button state
+          if (button) {
+            button.disabled = false;
+            button.textContent = originalText;
+          }
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error backing up data:', error);
+          alert('Failed to backup data: ' + (error.message || 'Unknown error'));
+          
+          // Restore button state
+          const button = event?.target || document.getElementById('backup-data-btn');
+          if (button) {
+            button.disabled = false;
+            button.textContent = 'Backup Data';
+          }
+        }
       };
-      
-      window.restoreData = function() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        input.onchange = function() {
-          alert('Data restored successfully! (Feature coming soon)');
-        };
-        input.click();
+
+      window.restoreData = async function() {
+        try {
+          // Create file input
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = '.json';
+          
+          input.onchange = async function(event) {
+            const file = event.target.files[0];
+            if (!file) {
+              return;
+            }
+
+            try {
+              // Read file
+              const fileText = await file.text();
+              const backupData = JSON.parse(fileText);
+
+              // Import restore service
+              const { validateBackupFile, restoreData } = await import('/src/services/restore.js');
+
+              // Validate backup file
+              const validation = await validateBackupFile(backupData);
+              if (!validation.valid) {
+                alert('Invalid backup file: ' + validation.error);
+                return;
+              }
+
+              // Show confirmation dialog with backup info
+              const metadata = validation.metadata;
+              const confirmMessage = `Restore backup data?\n\n` +
+                `Backup Details:\n` +
+                `- Exported: ${new Date(metadata.exportedAt).toLocaleString()}\n` +
+                `- Version: ${metadata.version}\n` +
+                `- Staff: ${metadata.staffCount} records\n` +
+                `- Attendance: ${metadata.attendanceCount} records\n` +
+                `- Settings: ${metadata.settingsCount} records\n` +
+                `- Reports: ${metadata.reportsCount} records\n\n` +
+                `Warning: This will restore data. Existing records may be overwritten if they conflict.`;
+
+              if (!confirm(confirmMessage)) {
+                return;
+              }
+
+              // Ask about overwrite option
+              const overwriteExisting = confirm(
+                'Overwrite existing records?\n\n' +
+                'Yes: Update existing records with backup data\n' +
+                'No: Skip existing records, only add new ones'
+              );
+
+              // Show loading
+              alert('Restoring data... This may take a moment.');
+
+              // Restore data
+              const result = await restoreData(backupData, { overwriteExisting });
+
+              if (!result.success) {
+                alert('Failed to restore data: ' + (result.error?.message || 'Unknown error'));
+                return;
+              }
+
+              // Show success with stats
+              const stats = result.stats;
+              const statsMessage = `Data restored successfully!\n\n` +
+                `Staff: ${stats.staff.inserted} inserted, ${stats.staff.updated} updated, ${stats.staff.errors} errors\n` +
+                `Attendance: ${stats.attendance.inserted} inserted, ${stats.attendance.errors} errors\n` +
+                `Settings: ${stats.settings.updated} updated, ${stats.settings.errors} errors\n` +
+                `Reports: ${stats.reports.inserted} inserted, ${stats.reports.errors} errors`;
+
+              alert(statsMessage);
+
+              // Reload page to show updated data
+              window.location.reload();
+            } catch (error) {
+              // eslint-disable-next-line no-console
+              console.error('Error restoring data:', error);
+              alert('Failed to restore data: ' + (error.message || 'Unknown error'));
+            }
+          };
+
+          input.click();
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error setting up restore:', error);
+          alert('Failed to set up restore: ' + (error.message || 'Unknown error'));
+        }
       };
+
+      // Settings initialization is now handled by afterEnter hook in routes.js
+      // No need to call loadSettings() here - it will be called when route is entered
     </script>
     <script type="module" src="/src/main.js"></script>
   </body>

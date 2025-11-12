@@ -37,9 +37,7 @@
                 <label class="form-label text-sm">Department</label>
                 <select id="filter-department" class="form-input">
                   <option value="">All Departments</option>
-                  <option value="Administration">Administration</option>
-                  <option value="Finance">Finance</option>
-                  <option value="IT">IT</option>
+                  <!-- Departments will be populated dynamically -->
                 </select>
               </div>
               <div>
@@ -75,59 +73,360 @@
                 </tbody>
               </table>
             </div>
+            <!-- Pagination -->
+            <div id="pagination-container" class="flex-center flex-gap-2 mt-6">
+              <!-- Pagination controls will be populated by JavaScript -->
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <script type="module">
-      import { getAllAttendance, getAllStaff } from '/src/services/mock-data.js';
-      
-      let allAttendance = getAllAttendance();
-      let allStaff = getAllStaff();
-      
-      function getStaffInfo(staffId) {
-        return allStaff.find(s => s.id === staffId) || { name: 'Unknown', department: 'N/A' };
-      }
-      
-      function renderTable(records = allAttendance) {
-        const tbody = document.getElementById('attendance-records-table');
-        tbody.innerHTML = '';
-        
-        records.forEach(record => {
-          const staffInfo = getStaffInfo(record.staffId);
-          const row = document.createElement('tr');
-          const statusBadge = record.isLate
-            ? '<span class="badge badge-warning">Late</span>'
-            : '<span class="badge badge-success">Present</span>';
-          row.innerHTML = `
-            <td>${record.date}</td>
-            <td>${staffInfo.name}</td>
-            <td>${record.staffId}</td>
-            <td>${staffInfo.department}</td>
-            <td>${record.checkIn}</td>
-            <td>${record.checkOut}</td>
-            <td>${statusBadge}</td>
-          `;
-          tbody.appendChild(row);
-        });
-      }
-      
-      window.filterRecords = function(event) {
-        event.preventDefault();
-        // Filter logic would go here
-        renderTable();
-      };
-      
-      window.resetFilters = function() {
-        document.querySelector('form').reset();
-        renderTable();
-      };
-      
-      window.exportAttendance = function() {
-        alert('Exporting attendance data... (Feature coming soon)');
-      };
-      
-      renderTable();
+    <script>
+      // Use non-module script to ensure functions are globally accessible
+      (async function() {
+        const { getAllAttendance } = await import('/src/services/attendance.js');
+        const { initAttendancePage } = await import('/src/utils/attendance-init.js');
+
+        // Pagination state
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let totalCount = 0;
+        let totalPages = 0;
+        let currentFilters = {};
+
+        async function loadAttendance(filters = {}, page = 1) {
+          try {
+            // Merge filters with pagination
+            const queryFilters = {
+              ...filters,
+              page: page,
+              limit: itemsPerPage,
+            };
+
+            const { data, totalCount: count, error } = await getAllAttendance(queryFilters);
+            if (error) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to load attendance:', error);
+              return;
+            }
+
+            // Update state
+            currentPage = page;
+            totalCount = count || 0;
+            totalPages = Math.ceil(totalCount / itemsPerPage);
+
+            // Render table and pagination
+            renderTable(data || []);
+            renderPagination();
+          } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('Error loading attendance:', error);
+          }
+        }
+
+        function renderTable(attendance) {
+          const tbody = document.getElementById('attendance-records-table');
+          if (!tbody) {
+            // eslint-disable-next-line no-console
+            console.error('Table body not found');
+            return;
+          }
+          
+          tbody.innerHTML = '';
+
+          if (attendance.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-secondary p-6">No attendance records found</td></tr>';
+            return;
+          }
+
+          attendance.forEach(record => {
+            const staff = record.staff || {};
+            const row = document.createElement('tr');
+            const checkInTime = record.check_in_time
+              ? new Date(record.check_in_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+              : '-';
+            const checkOutTime = record.check_out_time
+              ? new Date(record.check_out_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+              : '-';
+            const statusBadge = record.is_late
+              ? '<span class="badge badge-warning">Late</span>'
+              : '<span class="badge badge-success">Present</span>';
+            row.innerHTML = `
+              <td>${record.date}</td>
+              <td>${staff.name || 'Unknown'}</td>
+              <td>${staff.staff_id || record.staff_id || 'N/A'}</td>
+              <td>${staff.department || 'N/A'}</td>
+              <td>${checkInTime}</td>
+              <td>${checkOutTime}</td>
+              <td>${statusBadge}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        }
+
+        function renderPagination() {
+          const container = document.getElementById('pagination-container');
+          if (!container) {
+            return;
+          }
+
+          container.innerHTML = '';
+
+          // Don't show pagination if no records or only one page
+          if (totalPages <= 1) {
+            if (totalCount > 0) {
+              // Show page info even if only one page
+              const pageInfo = document.createElement('span');
+              pageInfo.className = 'text-secondary p-4';
+              pageInfo.textContent = `Page 1 of 1 (${totalCount} records)`;
+              container.appendChild(pageInfo);
+            }
+            return;
+          }
+
+          // Previous button
+          const prevBtn = document.createElement('button');
+          prevBtn.className = 'btn btn-outline';
+          prevBtn.textContent = 'Previous';
+          prevBtn.disabled = currentPage === 1;
+          prevBtn.onclick = () => previousPage();
+          container.appendChild(prevBtn);
+
+          // Page number buttons
+          const pageNumbers = getPageNumbers(currentPage, totalPages);
+          pageNumbers.forEach((pageNum) => {
+            if (pageNum === '...') {
+              const ellipsis = document.createElement('span');
+              ellipsis.className = 'text-secondary p-2';
+              ellipsis.textContent = '...';
+              container.appendChild(ellipsis);
+            } else {
+              const pageBtn = document.createElement('button');
+              pageBtn.className = pageNum === currentPage ? 'btn btn-primary' : 'btn btn-outline';
+              pageBtn.textContent = pageNum;
+              pageBtn.onclick = () => goToPage(pageNum);
+              container.appendChild(pageBtn);
+            }
+          });
+
+          // Next button
+          const nextBtn = document.createElement('button');
+          nextBtn.className = 'btn btn-outline';
+          nextBtn.textContent = 'Next';
+          nextBtn.disabled = currentPage === totalPages;
+          nextBtn.onclick = () => nextPage();
+          container.appendChild(nextBtn);
+
+          // Page info
+          const pageInfo = document.createElement('span');
+          pageInfo.className = 'text-secondary p-4';
+          pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+          container.appendChild(pageInfo);
+        }
+
+        function getPageNumbers(current, total) {
+          const pages = [];
+          const maxVisible = 7; // Show up to 7 page numbers
+
+          if (total <= maxVisible) {
+            // Show all pages if total is small
+            for (let i = 1; i <= total; i++) {
+              pages.push(i);
+            }
+          } else {
+            // Show pages around current page
+            if (current <= 4) {
+              // Near the beginning
+              for (let i = 1; i <= 5; i++) {
+                pages.push(i);
+              }
+              pages.push('...');
+              pages.push(total);
+            } else if (current >= total - 3) {
+              // Near the end
+              pages.push(1);
+              pages.push('...');
+              for (let i = total - 4; i <= total; i++) {
+                pages.push(i);
+              }
+            } else {
+              // In the middle
+              pages.push(1);
+              pages.push('...');
+              for (let i = current - 1; i <= current + 1; i++) {
+                pages.push(i);
+              }
+              pages.push('...');
+              pages.push(total);
+            }
+          }
+
+          return pages;
+        }
+
+        function goToPage(page) {
+          if (page >= 1 && page <= totalPages && page !== currentPage) {
+            loadAttendance(currentFilters, page);
+          }
+        }
+
+        window.previousPage = function() {
+          if (currentPage > 1) {
+            goToPage(currentPage - 1);
+          }
+        };
+
+        window.nextPage = function() {
+          if (currentPage < totalPages) {
+            goToPage(currentPage + 1);
+          }
+        };
+
+        window.filterRecords = async function(event) {
+          event.preventDefault();
+          
+          const filters = {
+            startDate: document.getElementById('filter-date-from')?.value || null,
+            endDate: document.getElementById('filter-date-to')?.value || null,
+            department: document.getElementById('filter-department')?.value || null,
+            staffId: document.getElementById('filter-staff')?.value || null,
+          };
+
+          // Remove null/empty filters
+          Object.keys(filters).forEach(key => {
+            if (filters[key] === null || filters[key] === '') {
+              delete filters[key];
+            }
+          });
+
+          // Store filters and reset to page 1
+          currentFilters = filters;
+          // eslint-disable-next-line no-console
+          console.log('Applying filters:', filters);
+          await loadAttendance(filters, 1);
+        };
+
+        window.resetFilters = function() {
+          const form = document.querySelector('form');
+          if (form) {
+            form.reset();
+          }
+          currentFilters = {};
+          loadAttendance({}, 1);
+        };
+
+        window.exportAttendance = async function() {
+          // For export, we need to fetch all records (no pagination)
+          try {
+            const filters = {
+              ...currentFilters,
+              page: 1,
+              limit: 10000, // Large limit to get all records
+            };
+
+            const { data: allAttendance, error } = await getAllAttendance(filters);
+            
+            if (error) {
+              alert('Failed to load attendance data for export');
+              return;
+            }
+
+            if (!allAttendance || allAttendance.length === 0) {
+              alert('No attendance data to export');
+              return;
+            }
+
+            // Create CSV content
+            const headers = ['Date', 'Staff Name', 'Staff ID', 'Department', 'Check In', 'Check Out', 'Status', 'Is Late'];
+            const rows = allAttendance.map(record => {
+              const staff = record.staff || {};
+              const checkInTime = record.check_in_time
+                ? new Date(record.check_in_time).toLocaleString('en-US', { 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })
+                : '-';
+              const checkOutTime = record.check_out_time
+                ? new Date(record.check_out_time).toLocaleString('en-US', { 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })
+                : '-';
+              const status = record.status || 'Present';
+              const isLate = record.is_late ? 'Yes' : 'No';
+              
+              return [
+                record.date || '',
+                staff.name || 'Unknown',
+                staff.staff_id || record.staff_id || '',
+                staff.department || 'N/A',
+                checkInTime,
+                checkOutTime,
+                status,
+                isLate
+              ];
+            });
+
+            // Convert to CSV format (handle commas and quotes in data)
+            const escapeCSV = (value) => {
+              if (value === null || value === undefined) return '';
+              const stringValue = String(value);
+              if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+                return `"${stringValue.replace(/"/g, '""')}"`;
+              }
+              return stringValue;
+            };
+
+            const csvContent = [
+              headers.map(escapeCSV).join(','),
+              ...rows.map(row => row.map(escapeCSV).join(','))
+            ].join('\n');
+
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            // Generate filename with current date
+            const today = new Date().toISOString().split('T')[0];
+            link.setAttribute('href', url);
+            link.setAttribute('download', `attendance-records-${today}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up
+            URL.revokeObjectURL(url);
+          } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('Error exporting attendance:', error);
+            alert('Failed to export attendance data');
+          }
+        };
+
+        // Initialize page (load departments, etc.)
+        async function initializePage() {
+          await initAttendancePage();
+          loadAttendance({}, 1);
+        }
+
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => {
+            initializePage();
+          });
+        } else {
+          initializePage();
+        }
+      })();
     </script>
     <script type="module" src="/src/main.js"></script>
   </body>

@@ -25,6 +25,7 @@
 
 .btn:hover {
   background-color: var(--flowbite-primary-hover);
+  color: var(--flowbite-text-inverse);
 }
 
 .btn:focus {
@@ -54,6 +55,7 @@
 
 .btn-primary:hover {
   background-color: var(--flowbite-primary-hover);
+  color: var(--flowbite-text-inverse);
 }
 
 .btn-secondary {
@@ -63,6 +65,7 @@
 
 .btn-secondary:hover {
   background-color: var(--flowbite-secondary-hover);
+  color: var(--flowbite-text-inverse);
 }
 
 .btn-success {
@@ -72,6 +75,7 @@
 
 .btn-success:hover {
   background-color: var(--flowbite-success-hover);
+  color: var(--flowbite-text-inverse);
 }
 
 .btn-danger {
@@ -81,6 +85,7 @@
 
 .btn-danger:hover {
   background-color: var(--flowbite-danger-hover);
+  color: var(--flowbite-text-inverse);
 }
 
 .btn-warning {
@@ -90,6 +95,7 @@
 
 .btn-warning:hover {
   background-color: var(--flowbite-warning-hover);
+  color: var(--flowbite-gray-900);
 }
 
 .btn-outline {
@@ -148,6 +154,12 @@
   background-color: var(--flowbite-primary-light);
 }
 
+.navbar-link.active {
+  color: var(--flowbite-primary);
+  font-weight: var(--flowbite-font-bold);
+  background-color: var(--flowbite-primary-light);
+}
+
 /* Card Component */
 .card {
   background-color: var(--flowbite-bg-primary);
@@ -189,6 +201,20 @@
   outline: none;
   border-color: var(--flowbite-primary);
   box-shadow: 0 0 0 3px var(--flowbite-primary-light);
+}
+
+/* Readonly input styling - visible but clearly non-editable */
+.form-input[readonly] {
+  cursor: not-allowed;
+  background-color: var(--flowbite-bg-secondary);
+  opacity: 0.8;
+  user-select: none;
+}
+
+.form-input[readonly]:focus {
+  outline: none;
+  border-color: var(--flowbite-border-color);
+  box-shadow: none;
 }
 
 .form-label {
@@ -477,6 +503,14 @@
 /* Width Utilities */
 .w-full {
   width: 100%;
+}
+
+.max-w-300 {
+  max-width: 300px;
+}
+
+.max-w-400 {
+  max-width: 400px;
 }
 
 .max-w-500 {

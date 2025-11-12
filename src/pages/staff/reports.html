@@ -41,60 +41,167 @@
       </div>
     </div>
     <script type="module">
-      import { mockMonthlyReport } from '/src/services/mock-data.js';
-      
-      function renderReports() {
-        const container = document.getElementById('reports-list');
-        const report = mockMonthlyReport;
-        
-        const reportCard = document.createElement('div');
-        reportCard.className = 'card shadow-sm mb-4';
-        reportCard.innerHTML = `
-          <div class="card-body p-6">
-            <div class="flex-between mb-4">
-              <div>
-                <h3 class="text-xl font-semibold mb-2">${report.month}</h3>
-                <p class="text-secondary text-sm">Attendance Summary Report</p>
-              </div>
-              <div class="flex flex-gap-2">
-                <button class="btn btn-primary btn-sm" onclick="downloadReport('pdf', '${report.month}')">PDF</button>
-                <button class="btn btn-outline btn-sm" onclick="downloadReport('excel', '${report.month}')">Excel</button>
-              </div>
-            </div>
-            <div class="grid-auto-fit-sm">
-              <div>
-                <p class="text-secondary text-sm mb-1">Total Days</p>
-                <p class="text-lg font-bold">${report.totalWorkingDays}</p>
-              </div>
-              <div>
-                <p class="text-secondary text-sm mb-1">Present</p>
-                <p class="text-lg font-bold text-success">${report.presentDays}</p>
-              </div>
-              <div>
-                <p class="text-secondary text-sm mb-1">Absent</p>
-                <p class="text-lg font-bold text-danger">${report.absences}</p>
-              </div>
-              <div>
-                <p class="text-secondary text-sm mb-1">Average Check-In</p>
-                <p class="text-lg font-bold">${report.averageCheckIn}</p>
-              </div>
-            </div>
-          </div>
-        `;
-        container.appendChild(reportCard);
-      }
-      
-      window.generateReport = function(event) {
+      import { getCurrentUser } from '/src/services/auth.js';
+      import { generateMonthlyReport } from '/src/services/reports.js';
+
+      window.generateReport = async function(event) {
         event.preventDefault();
         const month = document.getElementById('report-month').value;
-        alert(`Generating report for ${month}... (Feature coming soon)`);
+        
+        try {
+          const { user } = await getCurrentUser();
+          if (!user) return;
+
+          const { data, error } = await generateMonthlyReport(user.id, month);
+          if (error) {
+            alert('Failed to generate report: ' + error.message);
+            return;
+          }
+
+          // Save report
+          const { saveReport } = await import('/src/services/reports.js');
+          await saveReport({
+            staff_id: user.id,
+            report_type: 'monthly',
+            month: month + '-01',
+          });
+
+          // Reload reports using the utility function
+          const { reloadReports } = await import('/src/utils/staff-reports-init.js');
+          await reloadReports();
+          alert(`Report generated successfully for ${month}!`);
+        } catch (error) {
+          console.error('Error generating report:', error);
+          alert('Failed to generate report');
+        }
       };
-      
-      window.downloadReport = function(format, month) {
-        alert(`Downloading ${format.toUpperCase()} report for ${month}... (Feature coming soon)`);
+
+      window.downloadReport = async function(format, month) {
+        try {
+          const { user } = await getCurrentUser();
+          if (!user) {
+            alert('Failed to get user information');
+            return;
+          }
+
+          // Generate the full report data
+          const { data: reportData, error } = await generateMonthlyReport(user.id, month);
+          if (error || !reportData) {
+            alert('Failed to generate report: ' + (error?.message || 'Unknown error'));
+            return;
+          }
+
+          // Get detailed attendance records for the month
+          const startDate = `${month}-01`;
+          const endDate = new Date(new Date(startDate).setMonth(new Date(startDate).getMonth() + 1))
+            .toISOString()
+            .split('T')[0];
+
+          const { getAttendanceByStaff } = await import('/src/services/attendance.js');
+          const { data: attendanceRecords } = await getAttendanceByStaff(user.id, {
+            startDate,
+            endDate,
+          });
+
+          if (format === 'excel' || format === 'csv') {
+            // Generate CSV file
+            downloadCSVReport(reportData, attendanceRecords || [], month, user);
+          } else if (format === 'pdf') {
+            // Generate PDF file
+            const { downloadPDFReport } = await import('/src/utils/pdf-export.js');
+            await downloadPDFReport(reportData, attendanceRecords || [], month, user);
+          }
+        } catch (error) {
+          console.error('Error downloading report:', error);
+          alert('Failed to download report: ' + (error.message || 'Unknown error'));
+        }
       };
-      
-      renderReports();
+
+      function downloadCSVReport(reportData, attendanceRecords, month, user) {
+        // Format month for display
+        const monthDate = new Date(`${month}-01`);
+        const monthName = monthDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+
+        // Create CSV content
+        const csvLines = [];
+
+        // Header section
+        csvLines.push('Monthly Attendance Report');
+        csvLines.push(`Staff: ${user.name || 'N/A'}`);
+        csvLines.push(`Staff ID: ${user.staff_id || 'N/A'}`);
+        csvLines.push(`Department: ${user.department || 'N/A'}`);
+        csvLines.push(`Month: ${monthName}`);
+        csvLines.push(''); // Empty line
+
+        // Summary section
+        csvLines.push('Summary');
+        csvLines.push(`Total Working Days,${reportData.totalWorkingDays || 0}`);
+        csvLines.push(`Present Days,${reportData.presentDays || 0}`);
+        csvLines.push(`Absent Days,${reportData.absences || 0}`);
+        csvLines.push(`Lateness Count,${reportData.lateness || 0}`);
+        csvLines.push(`Average Check-In,${reportData.averageCheckIn || 'N/A'}`);
+        csvLines.push(`Average Check-Out,${reportData.averageCheckOut || 'N/A'}`);
+        csvLines.push(''); // Empty line
+
+        // Attendance details section
+        csvLines.push('Attendance Details');
+        csvLines.push('Date,Check In,Check Out,Status,Is Late');
+
+        // Sort attendance records by date
+        const sortedRecords = [...attendanceRecords].sort((a, b) => 
+          new Date(a.date) - new Date(b.date)
+        );
+
+        sortedRecords.forEach(record => {
+          const date = record.date ? new Date(record.date).toLocaleDateString('en-US') : 'N/A';
+          const checkIn = record.check_in_time
+            ? new Date(record.check_in_time).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+            : 'N/A';
+          const checkOut = record.check_out_time
+            ? new Date(record.check_out_time).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+            : 'N/A';
+          const status = record.status || 'N/A';
+          const isLate = record.is_late ? 'Yes' : 'No';
+
+          // Escape commas and quotes in CSV
+          const escapeCSV = (value) => {
+            if (value === null || value === undefined) return '';
+            const stringValue = String(value);
+            if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+              return `"${stringValue.replace(/"/g, '""')}"`;
+            }
+            return stringValue;
+          };
+
+          csvLines.push(
+            `${escapeCSV(date)},${escapeCSV(checkIn)},${escapeCSV(checkOut)},${escapeCSV(status)},${escapeCSV(isLate)}`
+          );
+        });
+
+        // Convert to CSV string
+        const csvContent = csvLines.join('\n');
+
+        // Create blob and download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `attendance-report-${month}-${user.staff_id || 'staff'}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+
+      // Reports loading is now handled by afterEnter hook in routes.js
+      // No need to call loadReports() here - it will be called when route is entered
     </script>
     <script type="module" src="/src/main.js"></script>
   </body>
