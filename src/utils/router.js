@@ -170,17 +170,34 @@ class Router {
       try {
         const response = await fetch(route.page);
         if (!response.ok) {
-          throw new Error(`Failed to load page: ${response.statusText}`);
+          throw new Error(`Failed to load page: ${response.status} ${response.statusText}`);
         }
         const html = await response.text();
+
+        // Check if response is empty
+        if (!html || html.trim().length === 0) {
+          throw new Error(`Empty response from ${route.page}`);
+        }
 
         // Parse and extract content
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
+        // Check for parsing errors
+        const parserError = doc.querySelector('parsererror');
+        if (parserError) {
+          throw new Error(`Failed to parse HTML from ${route.page}`);
+        }
+
         // Try to get content from #app div first, otherwise get body content
         const appDiv = doc.querySelector('#app');
-        const content = appDiv ? appDiv.innerHTML : doc.body.innerHTML;
+        const bodyContent = doc.body ? doc.body.innerHTML : '';
+        const content = appDiv ? appDiv.innerHTML : bodyContent;
+
+        // Check if content is empty
+        if (!content || content.trim().length === 0) {
+          throw new Error(`No content found in ${route.page}`);
+        }
 
         app.innerHTML = content;
 
@@ -196,6 +213,7 @@ class Router {
         });
       } catch (error) {
         console.error('Error loading page:', error);
+        // Re-throw to be caught by navigate() error handler
         throw error;
       }
     }
@@ -267,9 +285,36 @@ class Router {
       }
     });
 
-    // Handle initial route
-    const initialPath = this._normalizePathInternal(window.location.pathname);
-    this.navigate(initialPath, { replace: true });
+    // Handle initial route - ensure DOM is ready
+    const handleInitialRoute = () => {
+      const app = document.getElementById('app');
+      if (!app) {
+        // If app container doesn't exist yet, wait a bit and try again
+        setTimeout(handleInitialRoute, 10);
+        return;
+      }
+
+      const initialPath = this._normalizePathInternal(window.location.pathname);
+      this.navigate(initialPath, { replace: true }).catch((error) => {
+        console.error('Failed to load initial route:', error);
+        // Show error message in app container
+        app.innerHTML = `
+          <div class="text-center p-6">
+            <h1 class="text-2xl font-bold mb-4">Error Loading Page</h1>
+            <p class="text-secondary mb-6">Failed to load: ${initialPath}</p>
+            <a href="/" data-router class="btn btn-primary">Go Home</a>
+          </div>
+        `;
+      });
+    };
+
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', handleInitialRoute);
+    } else {
+      // DOM is already ready, but use setTimeout to ensure all scripts are loaded
+      setTimeout(handleInitialRoute, 0);
+    }
   }
 
   /**
