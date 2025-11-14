@@ -2,6 +2,16 @@
  * Header component logic
  */
 
+// Embedded header HTML template
+const HEADER_HTML = `<header class="navbar">
+  <nav class="navbar-container">
+    <a href="/" data-router class="navbar-brand">LG QAMS</a>
+    <ul class="navbar-menu">
+      <li><a href="/" data-router class="navbar-link">Home</a></li>
+    </ul>
+  </nav>
+</header>`;
+
 let cachedNavigationState = null;
 
 /**
@@ -84,34 +94,24 @@ export function initHeader(container, forceUpdate = false) {
     return;
   }
 
-  // Load header HTML
-  fetch('/src/components/header/header.html')
-    .then((response) => response.text())
-    .then((html) => {
-      container.innerHTML = html;
-      // Load header styles
-      loadStyles('/src/components/header/header.css');
-      // Router handles navigation automatically via event delegation on [data-router] links
+  // Set header HTML directly (embedded template)
+  container.innerHTML = HEADER_HTML;
+  // Router handles navigation automatically via event delegation on [data-router] links
 
-      // Update navigation based on user role
-      // If cache is set to signed-out, preserve it; otherwise clear for rebuild
-      if (
-        !cachedNavigationState ||
-        !(
-          cachedNavigationState.isLoggedIn === false &&
-          cachedNavigationState.role === null &&
-          cachedNavigationState.userId === null
-        )
-      ) {
-        // Clear cache to force rebuild on initial load (unless it's signed-out state)
-        cachedNavigationState = null;
-      }
-      updateNavigationIfNeeded();
-    })
-    .catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error('Failed to load header:', error);
-    });
+  // Update navigation based on user role
+  // If cache is set to signed-out, preserve it; otherwise clear for rebuild
+  if (
+    !cachedNavigationState ||
+    !(
+      cachedNavigationState.isLoggedIn === false &&
+      cachedNavigationState.role === null &&
+      cachedNavigationState.userId === null
+    )
+  ) {
+    // Clear cache to force rebuild on initial load (unless it's signed-out state)
+    cachedNavigationState = null;
+  }
+  updateNavigationIfNeeded();
 }
 
 /**
@@ -355,20 +355,3 @@ window.handleLogout = async function () {
     console.error('Logout error:', error);
   }
 };
-
-/**
- * Dynamically loads CSS file
- * @param {string} href - Path to CSS file
- */
-function loadStyles(href) {
-  // Check if stylesheet already loaded
-  const existingLink = document.querySelector(`link[href="${href}"]`);
-  if (existingLink) {
-    return;
-  }
-
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = href;
-  document.head.appendChild(link);
-}
