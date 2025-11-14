@@ -88,7 +88,8 @@ export default async function handler(req, res) {
       try {
         let template = readFileSync(resolve(root, 'index.html'), 'utf-8');
         template = transformHTML(template);
-        res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+        res.setHeader('Content-Type', 'text/html');
+        res.status(200).end(template);
         return;
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -136,7 +137,8 @@ export default async function handler(req, res) {
           content = transformHTML(content);
         }
 
-        res.status(200).set({ 'Content-Type': mimeType }).end(content);
+        res.setHeader('Content-Type', mimeType);
+        res.status(200).end(content);
         return;
       } catch (error) {
         // eslint-disable-next-line no-console
