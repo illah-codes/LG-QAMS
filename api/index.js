@@ -1,4 +1,3 @@
-import { createServer as createViteServer } from 'vite';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import { readFileSync, existsSync } from 'fs';
@@ -7,20 +6,6 @@ import { extname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const root = resolve(__dirname, '..');
-
-// Cache the Vite server instance
-let viteServerPromise;
-
-async function getViteServer() {
-  if (!viteServerPromise) {
-    viteServerPromise = createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-      root,
-    });
-  }
-  return viteServerPromise;
-}
 
 // MIME types
 const mimeTypes = {
@@ -32,41 +17,88 @@ const mimeTypes = {
   '.jpg': 'image/jpeg',
   '.gif': 'image/gif',
   '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
 };
+
+// Transform imports to use esm.sh CDN for bare specifiers
+function transformImports(content, filePath) {
+  // Only transform JS files
+  if (!filePath.endsWith('.js')) {
+    return content;
+  }
+
+  // Replace bare module specifiers with esm.sh CDN
+  // Handle: import ... from 'package' and import 'package'
+  // But preserve relative imports and absolute URLs
+  return content
+    .replace(/import\s+([^'"]*)\s+from\s+['"]([^./][^'"]*)['"]/g, (match, imports, pkg) => {
+      // Skip if it's a relative import or absolute URL
+      if (pkg.startsWith('.') || pkg.startsWith('/') || pkg.startsWith('http')) {
+        return match;
+      }
+      // Transform bare specifier to esm.sh
+      return `import ${imports} from 'https://esm.sh/${pkg}'`;
+    })
+    .replace(/import\s+['"]([^./][^'"]*)['"]/g, (match, pkg) => {
+      // Skip if it's a relative import or absolute URL
+      if (pkg.startsWith('.') || pkg.startsWith('/') || pkg.startsWith('http')) {
+        return match;
+      }
+      // Transform bare specifier to esm.sh
+      return `import 'https://esm.sh/${pkg}'`;
+    })
+    .replace(/export\s+.*\s+from\s+['"]([^./][^'"]*)['"]/g, (match, pkg) => {
+      // Skip if it's a relative import or absolute URL
+      if (pkg.startsWith('.') || pkg.startsWith('/') || pkg.startsWith('http')) {
+        return match;
+      }
+      // Transform bare specifier to esm.sh
+      return match.replace(pkg, `https://esm.sh/${pkg}`);
+    });
+}
+
+// Transform HTML to inject import map and transform script tags
+function transformHTML(content) {
+  // Add import map for common dependencies
+  const importMap = `
+    <script type="importmap">
+    {
+      "imports": {
+        "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2",
+        "flowbite": "https://esm.sh/flowbite@3",
+        "jspdf": "https://esm.sh/jspdf@2",
+        "qrcode": "https://esm.sh/qrcode@1"
+      }
+    }
+    </script>
+  `;
+
+  // Inject import map before the first script tag
+  return content.replace(/(<head>)/i, `$1${importMap}`);
+}
 
 // Vercel serverless function handler
 export default async function handler(req, res) {
   try {
-    const vite = await getViteServer();
     const url = req.url || req.originalUrl || '/';
-
-    // Remove query string
     const pathname = url.split('?')[0];
 
     // Handle root and SPA routes - serve index.html
     if (pathname === '/' || (!pathname.includes('.') && !pathname.startsWith('/@'))) {
       try {
         let template = readFileSync(resolve(root, 'index.html'), 'utf-8');
-        template = await vite.transformIndexHtml(pathname, template);
+        template = transformHTML(template);
         res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
         return;
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error('Error transforming HTML:', error);
-        res.status(500).end('Error loading page');
+        console.error('Error serving HTML:', error);
+        res.status(500).end('Error loading page: ' + error.message);
         return;
       }
     }
 
-    // Handle Vite internal requests (@vite/client, etc.)
-    if (pathname.startsWith('/@')) {
-      // Let Vite handle these through its internal server
-      // We'll need to proxy these, but for now return 404
-      res.status(404).end('Vite internal request not handled');
-      return;
-    }
-
-    // Handle source files - check if file exists and serve it
+    // Handle source files
     const filePath = resolve(root, pathname.startsWith('/') ? pathname.slice(1) : pathname);
 
     // Security check - ensure file is within root
@@ -79,22 +111,16 @@ export default async function handler(req, res) {
       try {
         const ext = extname(filePath);
         const mimeType = mimeTypes[ext] || 'application/octet-stream';
-        const content = readFileSync(filePath, 'utf-8');
+        let content = readFileSync(filePath, 'utf-8');
 
-        // Transform JS/CSS through Vite if needed
-        if (ext === '.js' || ext === '.css') {
-          try {
-            const transformed = await vite.transformRequest(pathname, { ssr: false });
-            res
-              .status(200)
-              .set({ 'Content-Type': mimeType })
-              .end(transformed?.code || content);
-            return;
-          } catch {
-            // If transformation fails, serve original
-            res.status(200).set({ 'Content-Type': mimeType }).end(content);
-            return;
-          }
+        // Transform JS files to use CDN for bare specifiers
+        if (ext === '.js') {
+          content = transformImports(content, filePath);
+        }
+
+        // Transform HTML files
+        if (ext === '.html') {
+          content = transformHTML(content);
         }
 
         res.status(200).set({ 'Content-Type': mimeType }).end(content);
@@ -102,13 +128,13 @@ export default async function handler(req, res) {
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error reading file:', error);
-        res.status(500).end('Error reading file');
+        res.status(500).end('Error reading file: ' + error.message);
         return;
       }
     }
 
     // File not found
-    res.status(404).end('Not found');
+    res.status(404).end('Not found: ' + pathname);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Server error:', error);
@@ -116,6 +142,7 @@ export default async function handler(req, res) {
       res.status(500).json({
         error: 'Internal server error',
         message: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       });
     }
   }
