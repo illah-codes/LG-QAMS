@@ -7,12 +7,12 @@ import {
   clearNavigationCache,
   setNavigationCacheToSignedOut,
 } from '../components/header/header.js';
-import { initFlowbite } from 'flowbite';
+import { initializeFlowbite } from './flowbite-init.js';
 import { onAuthStateChange } from '../services/auth.js';
 
 export function initializeApp() {
   // Initialize Flowbite JavaScript components
-  initFlowbite();
+  initializeFlowbite();
 
   // Initialize Supabase auth state listener
   onAuthStateChange((event) => {

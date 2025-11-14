@@ -172,9 +172,9 @@ router.afterEach(async (to) => {
   console.log(`Navigation to ${to.path} complete`);
 
   // Re-initialize Flowbite components after route change
-  const { initFlowbite } = await import('flowbite');
+  const { initializeFlowbite } = await import('./utils/flowbite-init.js');
   setTimeout(() => {
-    initFlowbite();
+    initializeFlowbite();
   }, 0);
 
   const { updateNavigationForRouteChange } = await import('./components/header/header.js');
