@@ -1,12 +1,15 @@
 {
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": null,
+  "version": 2,
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/api/index.js"
+      "destination": "/api/vite-server.js"
     }
-  ]
+  ],
+  "functions": {
+    "api/vite-server.js": {
+      "maxDuration": 30
+    }
+  }
 }
 

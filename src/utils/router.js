@@ -202,8 +202,17 @@ class Router {
         app.innerHTML = content;
 
         // Execute any scripts in the loaded HTML
+        // Skip scripts that would re-initialize the app (like main.js)
         const scripts = doc.querySelectorAll('script');
         scripts.forEach((oldScript) => {
+          const src = oldScript.getAttribute('src');
+
+          // Skip main.js and other app initialization scripts
+          // These are only meant for initial page load, not for route navigation
+          if (src && (src === '/src/main.js' || src.includes('main.js'))) {
+            return; // Skip this script
+          }
+
           const newScript = document.createElement('script');
           Array.from(oldScript.attributes).forEach((attr) => {
             newScript.setAttribute(attr.name, attr.value);
