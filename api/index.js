@@ -99,13 +99,26 @@ export default async function handler(req, res) {
     }
 
     // Handle source files
-    const filePath = resolve(root, pathname.startsWith('/') ? pathname.slice(1) : pathname);
+    // Normalize path: remove leading slash and resolve
+    const normalizedPath = pathname.startsWith('/') ? pathname.slice(1) : pathname;
+    const filePath = resolve(root, normalizedPath);
 
     // Security check - ensure file is within root
     if (!filePath.startsWith(root)) {
+      // eslint-disable-next-line no-console
+      console.error('Security check failed:', { filePath, root, pathname });
       res.status(403).end('Forbidden');
       return;
     }
+
+    // Debug logging
+    // eslint-disable-next-line no-console
+    console.log('File request:', {
+      pathname,
+      normalizedPath,
+      filePath,
+      exists: existsSync(filePath),
+    });
 
     if (existsSync(filePath)) {
       try {
