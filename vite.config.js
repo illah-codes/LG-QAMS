@@ -31,44 +31,6 @@ function copyRecursive(src, dest, fileExtensions = ['.html']) {
   }
 }
 
-// Function to collect all JS files that might be dynamically imported
-function collectAllJSFiles() {
-  const srcDir = resolve(__dirname, 'src');
-  const files = [];
-
-  function collect(dir, baseDir = srcDir) {
-    try {
-      const entries = readdirSync(dir, { withFileTypes: true });
-      for (const entry of entries) {
-        const fullPath = join(dir, entry.name);
-        if (entry.isDirectory()) {
-          collect(fullPath, baseDir);
-        } else if (entry.isFile() && entry.name.endsWith('.js')) {
-          files.push(fullPath);
-        }
-      }
-    } catch {
-      // Ignore errors
-    }
-  }
-
-  // Collect from directories that are dynamically imported
-  ['services', 'utils', 'components', 'config', 'guards'].forEach((dir) => {
-    const dirPath = resolve(srcDir, dir);
-    try {
-      if (
-        readdirSync(srcDir, { withFileTypes: true }).some((e) => e.isDirectory() && e.name === dir)
-      ) {
-        collect(dirPath);
-      }
-    } catch {
-      // Ignore
-    }
-  });
-
-  return files;
-}
-
 // Plugin to copy HTML pages and CSS files to dist
 function copyPagesPlugin() {
   return {
@@ -100,41 +62,12 @@ export default {
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
-      input: (() => {
-        // Include main entry point
-        const input = {
-          main: resolve(__dirname, 'index.html'),
-        };
-
-        // Include all JS files that might be dynamically imported
-        // This ensures they're bundled and can be imported at runtime
-        const jsFiles = collectAllJSFiles();
-        jsFiles.forEach((file) => {
-          // Use the relative path from src as the entry name
-          // This preserves the path structure for dynamic imports
-          const relativePath = file.replace(resolve(__dirname, 'src') + '/', '');
-          const entryName = relativePath.replace(/\.js$/, '');
-          input[entryName] = file;
-        });
-
-        return input;
-      })(),
+      input: resolve(__dirname, 'index.html'),
       output: {
-        manualChunks: undefined,
         // Ensure dynamic imports are properly resolved
         inlineDynamicImports: false,
         // Preserve module structure for dynamic imports
         format: 'es',
-        // Preserve entry file names for dynamic imports
-        entryFileNames: (chunkInfo) => {
-          // If it's the main entry, use the default name
-          if (chunkInfo.name === 'main') {
-            return 'assets/[name]-[hash].js';
-          }
-          // For other entries, preserve the path structure so dynamic imports work
-          // The entry name is already the relative path (e.g., "services/auth")
-          return `src/${chunkInfo.name}.js`;
-        },
       },
       // Don't externalize any dependencies - bundle everything
       // All npm packages including @supabase/supabase-js should be bundled
